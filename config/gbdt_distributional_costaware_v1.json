@@ -1,0 +1,62 @@
+{
+  "created_at": "2026-06-05",
+  "status": "PREFLIGHT_READY_CONTRACT",
+  "experiment": "gbdt_distributional_costaware_v1",
+  "source_dataset": "data/experiments/complex_v1a_sequence_probe_v1/sequence_arrays.npz",
+  "source_index": "data/experiments/complex_v1a_sequence_probe_v1/sequence_index.csv",
+  "source_feature_manifest": "data/experiments/complex_v1a_sequence_probe_v1/sequence_feature_manifest.csv",
+  "comparison_baseline": "fusion_concat_mt_s79 frozen predictor",
+  "feature_designs": [
+    {
+      "name": "last_mean_delta_all",
+      "role": "primary_candidate",
+      "description": "Last valid snapshot, masked mean and last-minus-first delta for every scaled tabular feature, plus length and valid_step_ratio."
+    },
+    {
+      "name": "last_mean_delta_no_prior_scores",
+      "role": "required_ablation",
+      "description": "Same design after removing upstream model score columns."
+    },
+    {
+      "name": "last_mean_delta_no_prior_no_clock",
+      "role": "stress_ablation",
+      "description": "Removes upstream score columns and direct clock/context columns."
+    }
+  ],
+  "targets": {
+    "regression": [
+      "y_last_cost0p5",
+      "y_last_cost1p0"
+    ],
+    "classification": [
+      "y_last_cost1p0 > 0"
+    ],
+    "downside": [
+      "low quantile or conservative lower-confidence proxy for y_last_cost1p0"
+    ]
+  },
+  "splits": {
+    "train": "terminal_split == train_initial",
+    "validation": "terminal_split == validation_initial",
+    "test_diagnostic_only": "terminal_split == test_terminal"
+  },
+  "default_implementation": {
+    "library": "sklearn",
+    "models": [
+      "HistGradientBoostingRegressor",
+      "HistGradientBoostingClassifier"
+    ],
+    "reason": "lightgbm, catboost and xgboost are not installed in the current environment."
+  },
+  "selection_rules": {
+    "must_select_on_validation_only": true,
+    "must_compare_against_frozen_s79": true,
+    "primary_cost": "cost0p5",
+    "stress_cost": "cost1p0",
+    "minimum_validation_actions": 80,
+    "minimum_test_actions_for_diagnostic": 80,
+    "requires_daily_cost1_report": true,
+    "requires_no_prior_score_ablation": true
+  },
+  "approval_note": "This contract can authorize a short training run, but current-corpus results remain diagnostic and cannot approve profitability."
+}

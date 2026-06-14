@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "edgerunner"
+version = "0.1.0"
+description = "Microestructura y predicción a corto plazo en mercados BTC de Polymarket (TFM)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Marc Maldonado Lorca" }]
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+edgerunner = ["py.typed"]

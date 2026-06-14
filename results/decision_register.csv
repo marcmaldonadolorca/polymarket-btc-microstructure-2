@@ -1,0 +1,8 @@
+order,phase,artifact,decision,public_role,reason
+1.0,EDA,docs/GUIA_02_SPLITS_Y_VALIDACION.md,TEMPORAL_WALK_FORWARD_PRIMARY,main,Random rows would leak adjacent frames and shared futures
+3.0,baselines,docs/INFORME_CIERRE_BASELINES_EDGERUNNER.md,CLOSE_SIMPLE_TAKER_BASELINES,main,Immediate signal degrades after latency and cost
+4.0,latency,docs/LATENCY_V11_OPERATIVE_CLOSEOUT.md,L1_CONCEPTUAL_L2_DATASET,main,Live latency is subsecond but corpus grid is 2 seconds
+8.0,methodology,docs/ORDERBOOK_ADVERSE_DIRECTION_CORRECTION.md,INVALIDATE_RAW_ADVERSE_RANKING,main,High adverse probability means worse opportunity
+10.0,oof,docs/UPSTREAM_OOF_FUSION_STAGE2_V1.md,NO_GO_CLEAN_OOF_FUSION_STAGE2_COST05,main,Clean OOF second stage is not robust
+13.0,horizon,docs/UPSTREAM_OOF_H120_AUDIT_V1.md,NO_GO_CLEAN_OOF_H120_COST05,main,H120 loses the modest H60 signal
+163.0,prestart_fresh_eval,docs/COMPLEX_V1A_PRESTART_H60_FRESH_EVAL_V1.md,PRESTART_SPECIALIST_FRESH_PASS_VOL_SENSITIVE,main,Fresh June 6-10: no_clock ev>0.75 hp>=0.5 gives +0.349 ticks net@0.5 (n=754). 52% HIGH_VOL regime in fresh vs 19.6% in train.

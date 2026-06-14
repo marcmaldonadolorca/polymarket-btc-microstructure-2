@@ -1,0 +1,50 @@
+# --- Datos pesados y artefactos (nunca se publican) ---
+data/experiments/
+data/raw/
+*.sqlite3
+*.parquet
+*.npz
+*.joblib
+*.pkl
+*.pt
+*.ckpt
+
+# Se permiten explícitamente los snapshots pequeños curados:
+!data/samples/
+!data/samples/**
+
+# --- Secretos y credenciales ---
+secrets/
+.env
+.env.*
+*.key
+*.pem
+
+# --- Material con copyright / no académico ---
+books/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# --- LaTeX (build de la memoria; se versiona el .tex y el PDF final) ---
+reports/*.aux
+reports/*.log
+reports/*.out
+reports/*.toc
+reports/*.synctex.gz
+reports/*.fls
+reports/*.fdb_latexmk
+
+# --- SO / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
