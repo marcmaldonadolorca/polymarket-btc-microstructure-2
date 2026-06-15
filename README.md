@@ -31,7 +31,8 @@ deciden. Todo el proyecto se reorganiza alrededor de esta lección.
 
 ## La escalera de modelos (el arco del proyecto)
 
-El relato sigue el patrón de las prácticas del máster
+El relato sigue una progresión incremental de modelos, exigiendo en cada paso que
+la complejidad añadida se justifique con evidencia
 (baseline → lineal → features → modelo profundo → modelo final):
 
 ```text

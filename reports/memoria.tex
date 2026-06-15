@@ -5,6 +5,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{enumitem}
@@ -12,6 +13,7 @@
 \usepackage{xcolor}
 \usepackage{titlesec}
 \usepackage{float}
+\usepackage{abstract}
 
 \geometry{margin=2.5cm}
 \hypersetup{
@@ -25,232 +27,275 @@
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
 
-% Entorno para las conclusiones clave, imitando los bloques ```text``` de los
-% correos a la tutora y de la documentación interna del proyecto.
-\usepackage{tcolorbox}
-\newtcolorbox{conclusion}{colback=gray!6, colframe=gray!40, boxrule=0.4pt,
-  left=6pt, right=6pt, top=4pt, bottom=4pt, fontupper=\footnotesize}
-
-\title{\textbf{Deep Learning Aplicado a la Microestructura Financiera:\\Predicción a Corto Plazo en Polymarket}}
-\author{Marc Maldonado Lorca\\Universidad Politécnica de Madrid --- Máster en Deep Learning\\Trabajo Fin de Máster}
-\date{Curso 2025/2026}
+\title{\textbf{Aprendizaje profundo aplicado a la microestructura de mercados de
+predicción: predicción de corto plazo en mercados de Bitcoin de Polymarket}}
+\author{Marc Maldonado Lorca\\
+\small Universidad Politécnica de Madrid\\
+\small \texttt{maldonadolorcamarc@gmail.com}}
+\date{2026}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Este Trabajo Fin de Máster estudia si las técnicas de Deep Learning pueden
-aprovechar señales de microestructura en los mercados de Bitcoin de Polymarket.
-No se trata de predecir el resultado final de un evento, sino movimientos
-locales de precio del contrato en ventanas de segundos, usando el libro de
-órdenes y referencias externas de BTC. La aportación principal no es un modelo
-ganador, sino una \emph{metodología} completa de captura de datos, validación
-temporal y control de costes, y la honestidad con la que se aplica. La lección
-central es que un baseline que acierta la dirección en torno al 90\,\% del tiempo
-deja de ser rentable cuando se introduce una latencia de entrada realista: el
-coste y la ejecución, no el acierto direccional, deciden el resultado. A partir
-de ahí se recorre una escalera de modelos (baseline tabular, modelos
-latency-aware, secuencias y orderbook con redes profundas) hasta un especialista
-tabular congelado con un gate de volatilidad, que sobrevive a cinco días de
-validación fuera de muestra (\,$+1{,}069$ ticks netos por operación, 5/5 días
-positivos\,). Todos los resultados se expresan en ticks netos, nunca en dólares,
-y se acompañan siempre de su soporte e incertidumbre. No se afirma rentabilidad
-real: se entrega la metodología, la evidencia y sus límites.
+\noindent
+Estudiamos si las técnicas de aprendizaje profundo pueden explotar señales de
+microestructura para predecir el movimiento de corto plazo del precio de los
+contratos binarios sobre Bitcoin negociados en Polymarket. A diferencia de los
+trabajos centrados en la resolución del evento, nuestro objetivo son los
+movimientos locales del precio del contrato en ventanas de segundos, combinando
+el libro de órdenes con referencias externas del mercado de Bitcoin. Nuestra
+principal contribución es una metodología reproducible de captura de datos
+multi-fuente, validación estrictamente temporal y evaluación bajo costes de
+ejecución y latencia realistas. Mostramos empíricamente que un clasificador
+direccional con una precisión cercana al 90\,\% deja de ser rentable al
+introducir una latencia de entrada de dos segundos, lo que sitúa el coste y la
+ejecución --- y no el acierto direccional --- como el problema central. A partir
+de ese hallazgo evaluamos una progresión de modelos (baselines tabulares,
+modelos sensibles a la latencia, y arquitecturas secuenciales y convolucionales
+sobre el libro de órdenes) y un especialista tabular congelado, combinado con un
+filtro de volatilidad, que sobrevive a una validación fuera de muestra de cinco
+días ($+1{,}069$ ticks netos por operación, intervalo de confianza bootstrap del
+90\,\% $[+0{,}472, +1{,}654]$, cinco de cinco días positivos). Reportamos todos
+los resultados en ticks netos y acompañados de su soporte e incertidumbre, y no
+afirmamos rentabilidad real: la aportación es la metodología, la evidencia y la
+delimitación de sus límites.
+
+\vspace{0.5em}
+\noindent\textbf{Palabras clave:} microestructura de mercado, mercados de
+predicción, libro de órdenes, aprendizaje profundo, validación temporal, costes
+de ejecución, cambio de distribución.
 \end{abstract}
 
-\tableofcontents
-\newpage
-
 % =====================================================================
-\section{INTRODUCCIÓN Y MOTIVACIÓN}
+\section{Introducción}
 
-\subsection{Planteamiento}
+Polymarket es un mercado de predicción descentralizado en el que se negocian
+contratos binarios sobre eventos futuros mediante un libro de órdenes con
+emparejamiento fuera de cadena y liquidación en cadena \cite{polymarket_trading}.
+En los mercados sobre el precio de Bitcoin, el precio del contrato, acotado entre
+0 y 1, se interpreta como una probabilidad implícita del evento
+\cite{polymarket_prices}. Esta estructura permite tratar el mercado como un
+pequeño \emph{exchange}, con bids, asks, spread, profundidad y flujo de órdenes,
+y plantea una pregunta de microestructura: ¿contiene el libro de órdenes señales
+explotables sobre el movimiento de corto plazo del precio del contrato?
 
-Este trabajo continúa la propuesta aceptada en la asignatura de Proyectos de
-Deep Learning. La idea de partida es tratar los mercados de Polymarket como un
-pequeño exchange financiero: hay libro de órdenes, bids, asks, spread y
-operaciones que llegan en el tiempo. La diferencia respecto a un exchange
-tradicional es que el activo es un contrato binario sobre un evento. Me centro
-en mercados BTC porque permiten cruzar la información de Polymarket con
-referencias externas de Bitcoin (Binance spot y perpetuo, Chainlink).
+El interés de este entorno reside en su naturaleza híbrida. El precio del
+contrato no es el precio de Bitcoin, sino una función no lineal y dependiente del
+tiempo de la probabilidad de que el evento se resuelva afirmativamente; sin
+embargo, está acoplado a referencias externas observables (mercados al contado y
+de derivados perpetuos, oráculos de precios). Un modelo de microestructura debe,
+por tanto, aprender simultáneamente la dinámica del libro y la semántica del
+contrato.
 
-La pregunta de fondo no es si el evento resolverá con \textsc{yes} o \textsc{no},
-sino si el precio del contrato contiene señales explotables a muy corto plazo.
-Para cada instante $t$ se construye una ventana con el estado del mercado y se
-intenta anticipar el movimiento en un horizonte $H$. Desde el principio asumo
-que una métrica de clasificación puede engañar: un modelo puede tener buen
-acierto y aun así no servir si opera tarde, si aprende artefactos del dataset o
-si ignora el coste real de la orden.
+Una hipótesis recurrente en este tipo de trabajos es que un clasificador con
+buena precisión direccional constituye una estrategia rentable. Esta hipótesis es
+engañosa: una métrica de clasificación puede ser elevada y, aun así, el sistema
+no ser explotable si opera con retraso, aprende artefactos del conjunto de datos
+o ignora el coste real de la orden. El núcleo de este trabajo consiste en evaluar
+cada modelo no por su acierto, sino por su rendimiento económico bajo costes y
+latencia realistas.
 
-\subsection{Objetivo y contribución}
-
-El objetivo declarado en la propuesta era construir un flujo reproducible,
-definir controles de calidad de datos, entrenar baselines, evaluar Deep Learning
-sobre secuencias de orderbook y medir el rendimiento con métricas económicas, no
-solo de clasificación. Cumplidos esos pasos, la contribución defendible de la
-memoria es doble:
-
+\paragraph{Contribuciones.} Este artículo presenta:
 \begin{itemize}
-  \item un \textbf{sistema de datos propio} multi-fuente con gates de calidad por
-  sesión, y
-  \item un \textbf{protocolo de evaluación honesto} que muestra dónde y por qué se
-  rompe la cadena entre predicción y ejecución, y que termina en un candidato
-  congelado validado fuera de muestra bajo costes.
+  \item un sistema de adquisición de datos multi-fuente con controles de calidad
+  por sesión que produce un corpus alineado temporalmente (Sección~\ref{sec:datos});
+  \item un protocolo de evaluación que combina validación estrictamente temporal,
+  un modelo explícito de costes y latencia medida empíricamente, y la
+  congelación del candidato antes de su validación fuera de muestra
+  (Sección~\ref{sec:metodo});
+  \item evidencia cuantitativa de que la latencia, y no el acierto direccional,
+  determina el resultado, junto con una progresión de modelos que delimita dónde
+  se rompe la cadena entre predicción y ejecución (Sección~\ref{sec:experimentos});
+  \item un candidato tabular congelado con filtro de volatilidad que sobrevive a
+  una validación fuera de muestra bajo costes, así como un conjunto de
+  experimentos de adaptación al cambio de régimen con resultado negativo, que
+  reportamos por su valor metodológico (Sección~\ref{sec:resultados}).
 \end{itemize}
 
-Es importante el matiz: la honestidad del protocolo (congelar antes de mirar,
-distinguir simulación de validación, admitir los errores) es la tesis, por
-encima de cualquier número concreto.
+% =====================================================================
+\section{Trabajo relacionado}
 
-\subsection{Cómo leer esta memoria}
+\subsection{Mercados de predicción}
 
-La memoria sigue el patrón de las prácticas del máster: baseline sencillo
-$\rightarrow$ modelo con features $\rightarrow$ modelo profundo $\rightarrow$
-modelo final, justificando cada salto con evidencia. El capítulo de experimentos
-recorre esa escalera en orden cronológico, tal y como ocurrió, incluyendo los
-caminos que no funcionaron, porque los negativos son parte del resultado.
+Los mercados de predicción se han estudiado como mecanismos de agregación de
+información dispersa. Wolfers y Zitzewitz \cite{wolfers2004prediction} muestran
+que pueden producir previsiones precisas, si bien su interpretación depende del
+diseño del contrato, la liquidez y los incentivos de los participantes. La
+mayoría de esta literatura se centra en la calibración del precio frente a la
+resolución del evento. Nuestro objetivo es distinto y más cercano a la
+microestructura: la dinámica intradía del precio del contrato a escala de
+segundos, donde aparecen spreads, profundidad limitada y desalineaciones
+transitorias respecto a las referencias externas.
+
+\subsection{Aprendizaje profundo sobre libros de órdenes}
+
+La predicción de movimientos de precio a partir del libro de órdenes es un
+problema bien establecido. DeepLOB \cite{zhang2019deeplob} propone una
+arquitectura que combina convoluciones para capturar la estructura espacial del
+libro con capas recurrentes para la dependencia temporal, evaluada sobre el
+conjunto de referencia FI-2010 \cite{ntakaris2018}. Tsantekidis et al.
+\cite{tsantekidis2017} aplican redes convolucionales y recurrentes a la detección
+de cambios de precio en libros de órdenes. Sirignano y Cont
+\cite{sirignano2019universal} aportan evidencia de la existencia de
+características universales en la formación de precios aprendibles mediante
+aprendizaje profundo, y Jha et al. \cite{jha2020digital} trasladan estas ideas a
+criptoactivos. Estos trabajos justifican tratar el libro como un objeto con
+estructura espacio-temporal en lugar de como una tabla plana, pero suelen evaluar
+con métricas de clasificación y rara vez bajo un modelo de ejecución realista.
+
+\subsection{Microestructura, costes de ejecución y latencia}
+
+La distancia entre la predicción y la rentabilidad es un tema central de la
+microestructura. Kearns y Nevmyvaka \cite{kearns2013} revisan el papel del
+aprendizaje automático en microestructura y negociación de alta frecuencia, y
+subrayan que la ejecución, el coste y la latencia condicionan de forma decisiva
+la viabilidad de una señal. Nuestro trabajo cuantifica este fenómeno en el
+contexto de Polymarket: medimos la latencia real del ciclo de orden y mostramos
+que una señal direccional fuerte se vuelve no rentable bajo una latencia de
+entrada modesta.
+
+\subsection{Aprendizaje automático en finanzas y validación temporal}
+
+El aprendizaje automático aplicado a la predicción financiera es propenso a
+resultados ilusorios cuando la evaluación no respeta la estructura temporal. Gu,
+Kelly y Xiu \cite{gu2020empirical} ofrecen un marco riguroso de comparación de
+modelos con validación fuera de muestra. López de Prado \cite{lopezdeprado2018}
+documenta los mecanismos de fuga de información y de sobreajuste de \emph{backtests}
+y propone protocolos de validación que respetan la causalidad temporal. Bailey y
+López de Prado \cite{bailey2014deflated} advierten sobre la inflación de métricas
+de rendimiento bajo selección múltiple de modelos. Estas referencias motivan
+nuestra elección de una partición estrictamente temporal, un protocolo
+\emph{out-of-fold} y la congelación del candidato antes de observar el conjunto
+de validación fuera de muestra.
+
+\subsection{Cambio de distribución y adaptación de dominio}
+
+La no estacionariedad de los mercados financieros provoca cambios de distribución
+entre el periodo de entrenamiento y el de despliegue. Las técnicas de adaptación
+de dominio, como la alineación de correlaciones CORAL \cite{sun2016coral},
+buscan mitigar este efecto. En la Sección~\ref{sec:resultados} mostramos que, con
+un horizonte de datos reducido, estas técnicas no superan a una estrategia más
+simple basada en restringir la operativa al régimen en el que el modelo fue
+entrenado.
 
 % =====================================================================
-\section{TRABAJO RELACIONADO}
+\section{Adquisición de datos y corpus}
+\label{sec:datos}
 
-El trabajo se apoya en cuatro áreas. Los mercados de predicción se estudian como
-mecanismos de agregación de información: Wolfers y Zitzewitz
-\cite{wolfers2004prediction} muestran que pueden producir previsiones precisas,
-aunque su interpretación depende del diseño del contrato, la liquidez y los
-incentivos. Esto encaja con Polymarket, donde el precio de un contrato binario
-se lee como una probabilidad implícita \cite{polymarket_prices}, pero su
-documentación lo describe además como un CLOB con matching off-chain y
-liquidación on-chain \cite{polymarket_trading}, lo que permite tratarlo como un
-exchange con spread, profundidad y slippage.
+\subsection{Sistema de captura multi-fuente}
 
-Sobre libros de órdenes, DeepLOB \cite{zhang2019deeplob} propone convoluciones
-para la estructura espacial del libro y capas recurrentes para la dinámica
-temporal; Sirignano y Cont \cite{sirignano2019universal} argumentan que existen
-características universales en la formación de precios aprendibles con Deep
-Learning, y Jha et al. \cite{jha2020digital} aplican redes convolucionales
-temporales a orderbooks de criptoactivos. Como problema de series temporales,
-arquitecturas como el Temporal Fusion Transformer \cite{lim2021tft} sirven de
-referencia para combinar covariables e historiales.
+Desarrollamos un sistema de captura propio que registra, por sesión de mercado,
+el libro de órdenes de Polymarket, el flujo de operaciones, la metadata del
+mercado y referencias externas del mercado al contado y de derivados perpetuos de
+Bitcoin, así como un oráculo de precios. Las fuentes se alinean temporalmente
+sobre una malla regular de dos segundos. Esta elección no es accesoria: define el
+contrato de latencia utilizado en la evaluación, ya que en lugar de interpolar un
+instante no observado evaluamos contra la siguiente fotografía disponible del
+mercado.
 
-Finalmente, la evaluación realista es un eje del trabajo. La analogía con
-Pendlebury et al. \cite{pendlebury2019tesseract} sobre sesgos espaciales y
-temporales es directa: si se mezclan datos futuros con el entrenamiento, el
-resultado parece mejor de lo que será en producción. Las recomendaciones de Arp
-et al. \cite{arp2022dos} sobre errores comunes en ML aplicado, y la deuda técnica
-descrita por Sculley et al. \cite{sculley2015debt}, guían las decisiones de
-protocolo y trazabilidad.
+\subsection{Controles de calidad por sesión}
 
-% =====================================================================
-\section{SISTEMA DE DATOS}
+Cada sesión se somete a controles de calidad antes de incorporarse al corpus:
+cobertura temporal, continuidad, proporción de datos obsoletos (\emph{stale}),
+validación de arranque y detección de huecos severos. Las sesiones que no superan
+los umbrales se descartan. Esta separación entre sesiones válidas y rechazadas es
+deliberada: una referencia externa retrasada o incompleta puede inducir una señal
+espuria, y preferimos reducir el tamaño de la muestra antes que contaminar el
+entrenamiento.
 
-\subsection{Recolector multi-fuente}
+\subsection{Composición del corpus}
 
-Construí un recolector propio que captura, por sesión de mercado, el orderbook
-de Polymarket (CLOB), trades, metadata de mercado, y referencias externas de
-Binance spot y perpetuo y de Chainlink. Las fuentes se alinean temporalmente
-sobre una malla de dos segundos. La elección de la malla no es cosmética:
-condiciona el contrato de latencia que se usa más adelante, porque en vez de
-interpolar un instante que no observamos, evaluamos contra la siguiente
-fotografía disponible.
-
-\subsection{Calidad por sesión}
-
-Cada sesión pasa controles de calidad antes de entrar al corpus: cobertura,
-continuidad, ratio de datos \emph{stale}, validación de arranque (\emph{smoke})
-y huecos severos. Las sesiones que no superan los umbrales se rechazan. Esta
-separación entre sesiones válidas y rechazadas es deliberada: un dato externo
-retrasado o incompleto puede generar una señal falsa, y prefiero perder muestras
-a contaminar el entrenamiento.
-
-\subsection{Corpus}
-
-El corpus principal cubre del 11 al 25 de mayo de 2026 (entrenamiento, validación
-y test temporal), con del orden de 2,6 millones de filas cross-venue. Como
-conjunto fresco \emph{fuera de muestra} se reservó del 6 al 10 de junio de 2026,
-capturado después de congelar el candidato (véase la Sección~\ref{sec:metodo}).
-La unidad de trabajo es \texttt{session\_id + token\_id + time\_index\_ns} sobre
-la malla de dos segundos; el esquema de la consulta base se publica en el
-repositorio (\texttt{sql/core\_training\_base.sql}). El corpus completo y la
-fuente SQLite del recolector no se publican por tamaño y privacidad.
+El corpus principal abarca del 11 al 25 de mayo de 2026 (entrenamiento,
+validación y test terminal), con del orden de $2{,}6$ millones de filas
+cross-venue. Como conjunto fuera de muestra reservamos del 6 al 10 de junio de
+2026, capturado con posterioridad a la congelación del candidato
+(Sección~\ref{sec:metodo}). La unidad de observación es la tupla
+\texttt{sesión $\times$ token $\times$ instante} sobre la malla de dos segundos.
 
 % =====================================================================
-\section{METODOLOGÍA}
+\section{Formulación del problema y metodología}
 \label{sec:metodo}
 
-\subsection{Target y unidad de acción}
+\subsection{Definición del objetivo}
 
-La etiqueta direccional se calcula \emph{offline} a partir del movimiento futuro
-del mid-price,
+Para cada instante $t$ definimos el retorno futuro del precio medio a un horizonte
+$H$,
 \[
-\Delta_H = \frac{mid_{t+H} - mid_t}{mid_t},
+\Delta_H = \frac{m_{t+H} - m_t}{m_t},
 \]
-con un umbral $\theta$ que debe cubrir spread, comisiones y ruido. Las
-observaciones son causales; las etiquetas se generan a posteriori y con
-trazabilidad, para no contaminar las features con información del futuro. Todo el
-resultado económico se expresa en \textbf{ticks netos}, la unidad natural del
-libro, y nunca en dólares: hablar en dólares introduce supuestos de tamaño de
-posición y suena a sobreafirmación.
+donde $m_t$ es el precio medio del contrato. La etiqueta direccional se obtiene
+mediante un umbral $\theta$ que absorbe spread, comisiones y ruido,
+\[
+y_t = \begin{cases}
+\text{UP} & \Delta_H > \theta,\\
+\text{DOWN} & \Delta_H < -\theta,\\
+\text{FLAT} & \text{en otro caso.}
+\end{cases}
+\]
+Las características son causales y las etiquetas se calculan \emph{a posteriori} de
+forma trazable, de modo que no se introduce información del futuro en las
+entradas del modelo. Todos los resultados económicos se expresan en \emph{ticks}
+netos, la unidad natural del libro de órdenes; evitamos expresarlos en términos
+monetarios porque ello requeriría supuestos adicionales sobre el tamaño de
+posición y favorecería la sobreafirmación.
 
-\subsection{Validación temporal y fuga de datos}
+\subsection{Validación temporal y prevención de fuga}
 
-La partición es estrictamente temporal: se entrena con sesiones antiguas, se
-valida con sesiones posteriores y se abre el test terminal al final. En los
-experimentos secuenciales se usa además un protocolo \emph{out-of-fold} (OOF):
-cada modelo se entrena solo con días anteriores, las predicciones que consume una
-segunda etapa son OOF, y la política se elige sin mirar el test. Esta disciplina
-contra la fuga temporal es la que evita que un resultado offline brillante se
-desmorone en producción \cite{pendlebury2019tesseract}.
+La partición es estrictamente temporal: el entrenamiento utiliza las sesiones más
+antiguas, la validación las posteriores y el test terminal el bloque final. En
+los experimentos secuenciales empleamos además un protocolo \emph{out-of-fold}:
+cada modelo se entrena únicamente con días anteriores, las predicciones que
+consume una segunda etapa son fuera de muestra, y la política de decisión se
+selecciona sin observar el test terminal. Esta disciplina contra la fuga temporal
+es la salvaguarda frente a resultados ilusorios
+\cite{lopezdeprado2018, gu2020empirical}.
 
 \subsection{Modelo de costes y latencia}
 
-Medí la latencia real del flujo de orden de Polymarket en una prueba controlada:
-la mediana de tiempo desde que se observa la oportunidad hasta el ack/match del
-CLOB fue de aproximadamente $0{,}43$ segundos en p95 para la muestra válida. Por
-prudencia, el contrato de modelado fija:
-
-\begin{conclusion}
-\begin{verbatim}
-latencia conceptual de modelado = 1 segundo
-latencia observable en el dataset = 2 segundos
-\end{verbatim}
-\end{conclusion}
-
-La latencia observable de dos segundos es conservadora porque coincide con la
-malla del dataset. El coste de referencia es de $0{,}5$ ticks por operación, con
-un contraste optimista de $0{,}25$.
+Medimos empíricamente la latencia del ciclo de orden de Polymarket en una prueba
+controlada. El tiempo desde la observación de la oportunidad hasta la
+confirmación de emparejamiento del libro fue de aproximadamente $0{,}43$~segundos
+en el percentil 95 de la muestra válida. Por prudencia, fijamos una latencia
+conceptual de modelado de un segundo y una latencia observable en el conjunto de
+datos de dos segundos; esta última coincide con la malla de captura, lo que hace
+la evaluación conservadora. El coste de referencia por operación es de $0{,}5$
+ticks, con un contraste optimista de $0{,}25$ ticks.
 
 \subsection{Protocolo de congelación}
 
-El candidato final se \textbf{congeló} (modelo, features y umbrales de política)
-\emph{antes} de ver los datos fresh del 6--10 de junio. Esto convierte la
-validación fresh en una prueba fuera de muestra genuina y no en otra ronda de
-ajuste. Es una decisión metodológica deliberada: una vez fijada la política, no
-se retoca para mejorar los números.
+El candidato final --- modelo, conjunto de características y umbrales de
+política --- se congeló antes de observar el conjunto fuera de muestra del 6 al 10
+de junio. Esta decisión convierte la validación posterior en una prueba fuera de
+muestra genuina en lugar de una nueva ronda de ajuste, y previene el sobreajuste
+por selección múltiple \cite{bailey2014deflated}. Una vez fijada, la política no
+se reajusta para mejorar los resultados.
 
 % =====================================================================
-\section{EXPERIMENTOS: LA ESCALERA DE MODELOS}
+\section{Progresión experimental de modelos}
+\label{sec:experimentos}
 
-\subsection{Baseline tabular H16}
+Evaluamos una progresión incremental de modelos, de menor a mayor complejidad,
+exigiendo en cada paso que la complejidad adicional se justifique con evidencia de
+mejora bajo el mismo protocolo de costes y validación.
 
-El primer baseline tabular sobre el horizonte corto acierta la dirección en torno
-al 90\,\% y pasa los folds walk-forward. Visto solo con métricas de clasificación,
-parece excelente. Este es exactamente el espejismo que la metodología busca
-evitar.
+\subsection{Baseline tabular y el impacto de la latencia}
 
-\subsection{El stress de latencia (lección central)}
-
-Al introducir la entrada retrasada y el coste, el panorama cambia. La
-Tabla~\ref{tab:stress} muestra el test terminal (el bloque que no se usa para
-elegir la política) bajo distintas latencias, en el escenario conservador con
-filtro de spread.
+Un baseline tabular sobre el horizonte corto alcanza una precisión direccional
+cercana al 90\,\% y supera la validación temporal por bloques. Evaluado solo con
+métricas de clasificación, parece excelente. Sin embargo, al introducir la
+entrada retrasada y el coste, el panorama cambia radicalmente. La
+Tabla~\ref{tab:stress} reporta el rendimiento en el test terminal --- el bloque no
+utilizado para seleccionar la política --- en función de la latencia, en un
+escenario conservador con filtro de spread.
 
 \begin{table}[H]
 \centering
 \small
 \begin{tabular}{rrrrrr}
 \toprule
-\textbf{Latencia} & \textbf{Acciones} & \textbf{Hit up} & \textbf{Wrong down} & \textbf{Neto medio} & \textbf{Neto total} \\
+\textbf{Latencia} & \textbf{Acciones} & \textbf{Acierto UP} & \textbf{Error DOWN} & \textbf{Neto medio} & \textbf{Neto total} \\
 \midrule
 $0$\,s & 64 & 92,19\,\% & 1,56\,\%  & $+6{,}79$  & $+434{,}44$ \\
 $2$\,s & 63 & 39,68\,\% & 44,44\,\% & $-1{,}48$  & $-93{,}48$  \\
@@ -258,68 +303,60 @@ $4$\,s & 66 & 45,45\,\% & 43,94\,\% & $-0{,}74$  & $-48{,}83$  \\
 $8$\,s & 66 & 43,94\,\% & 31,82\,\% & $-0{,}30$  & $-19{,}53$  \\
 \bottomrule
 \end{tabular}
-\caption{Test terminal bajo latencia (ticks). La señal a $0$\,s es real como
-markout, pero no sobrevive como política ejecutable a $2$\,s.}
+\caption{Rendimiento en el test terminal bajo distintas latencias (ticks). La
+señal a latencia nula es real como \emph{markout} desde $t$, pero no sobrevive
+como política ejecutable con una latencia de $2$\,s.}
 \label{tab:stress}
 \end{table}
 
-\begin{conclusion}
-\begin{verbatim}
-Acertar la dirección no es suficiente; con latencia realista de 2 s el neto
-del test terminal cae a -1,48 ticks. El problema central pasa a ser la
-ejecución, no la predicción.
-\end{verbatim}
-\end{conclusion}
+El resultado es nuestra observación central: acertar la dirección no equivale a
+obtener beneficio. Con una latencia realista de dos segundos, el neto medio del
+test terminal cae a $-1{,}48$ ticks. En consecuencia, el problema deja de ser de
+clasificación y pasa a ser de ejecución, y a partir de aquí todo modelo se evalúa
+por su política económica bajo coste y latencia.
 
-Esta tabla reorganiza todo el proyecto. A partir de aquí, cualquier modelo se
-juzga por su política económica bajo coste y latencia, no por su acierto.
+\subsection{Modelos sensibles a la latencia}
 
-\subsection{Modelos latency-aware}
+El siguiente paso incorpora la latencia en el etiquetado y la selección. Un modelo
+sensible a la latencia alcanzó un AUC de test de $0{,}79$, pero su política
+económica seguía siendo negativa. La conclusión es coherente con la anterior: una
+mayor capacidad de clasificación no implica una política rentable.
 
-El siguiente peldaño son modelos que incorporan la latencia en el etiquetado y la
-selección. Un modelo latency-aware llegó a un AUC de test de $0{,}79$, pero la
-política económica seguía siendo negativa. La conclusión es coherente con la
-anterior: más capacidad de clasificación no implica una política rentable.
+\subsection{Modelos secuenciales y convolucionales sobre el libro}
 
-\subsection{Secuencias y orderbook con Deep Learning}
+Construimos secuencias de hasta ocho fotografías del mercado y un tensor del libro
+de órdenes de los diez primeros niveles, con forma
+$5\,831 \times 8 \times 10 \times 10$, auditado como completo y alineado. Sobre
+esta representación evaluamos modelos tabulares secuenciales, redes recurrentes
+(GRU), una red convolucional unidimensional sobre el libro siguiendo la intuición
+de DeepLOB \cite{zhang2019deeplob, tsantekidis2017}, fusiones de secuencia
+tabular y libro, y selectores de riesgo. Las arquitecturas recurrentes y de fusión
+mostraron señal de representación, y algunas políticas \emph{proxy} resultaron
+positivas; sin embargo, dejaron de serlo al exigir selección causal, estabilidad
+diaria o modelado de ejecuciones parciales y adversas. Por tanto, no las
+consideramos candidatas finales. El aprendizaje profundo aporta representación,
+pero no una política rentable y estable con un horizonte de datos de
+aproximadamente quince días.
 
-Construí secuencias de hasta ocho snapshots y un tensor del orderbook top-10 de
-forma $5\,831 \times 8 \times 10 \times 10$, auditado como completo y alineado.
-Sobre esa representación probé modelos tabulares secuenciales, GRU, una Conv1D
-solo con orderbook (siguiendo la intuición de DeepLOB \cite{zhang2019deeplob}),
-fusiones de secuencia tabular y orderbook, y selectores de riesgo. La GRU y la
-fusión mostraron señal de representación, y algunas políticas proxy fueron
-positivas, pero dejaron de serlo al exigir selección causal, estabilidad diaria o
-fills parciales/adversos. Por eso no se consideran modelos finales.
+\subsection{Corrección del score de selección adversa}
 
-\begin{conclusion}
-\begin{verbatim}
-El Deep Learning aporta representación, pero no una política rentable y estable
-con ~15 días de datos. Es un negativo honesto, no un fracaso oculto.
-\end{verbatim}
-\end{conclusion}
+Durante la auditoría de selección detectamos un error de interpretación: la
+variable objetivo de selección adversa, en la que el valor positivo denota un
+resultado desfavorable, se había empleado de forma que su probabilidad actuaba
+como puntuación descendente. La orientación correcta del score es
+$1 - P(\text{adverso})$. Marcamos los resultados afectados como superados y
+repetimos la validación con la orientación corregida; la candidata anterior dejó
+de constituir evidencia válida. Documentamos este episodio porque ilustra que una
+métrica positiva no es suficiente: es necesario auditar el significado económico
+de la puntuación que guía la selección.
 
-\subsection{Corrección metodológica del score adverse}
+\subsection{Protocolo \emph{out-of-fold} y selección de horizonte}
 
-Durante la auditoría de selección detecté un error semántico: el target
-\texttt{adverse=1} representa un resultado malo, pero se había usado su
-probabilidad como score descendente. La dirección correcta es
-\[
-\texttt{safe\_adverse\_score} = 1 - P(\text{adverse}).
-\]
-Marqué los resultados afectados como superados y repetí la validación con la
-dirección corregida; la candidata anterior dejó de ser evidencia válida. Incluyo
-este episodio deliberadamente: muestra por qué no basta con una métrica positiva,
-también hay que auditar el significado económico del score. Es, probablemente, la
-mejor evidencia de rigor del proyecto.
-
-\subsection{Protocolo OOF estricto y selección de horizonte}
-
-Repetí la fusión bajo un protocolo estrictamente out-of-fold. La segunda etapa no
-produjo una política robusta (\texttt{NO\_GO\_CLEAN\_OOF\_FUSION\_STAGE2}), pero
-el modelo H60 conservó una señal modesta (AUC de test $0{,}5656$; top 35\,\% tras
-coste $0{,}5$ de $+0{,}1778$ ticks proxy). Para comprobar si el problema era
-predecir demasiado pronto, comparé H60 frente a H120 con exactamente las mismas
+Repetimos la fusión bajo un protocolo estrictamente fuera de muestra. La segunda
+etapa no produjo una política robusta, pero el modelo a horizonte H60 conservó una
+señal modesta (AUC de test $0{,}5656$; rendimiento medio del 35\,\% superior tras
+coste $0{,}5$ de $+0{,}1778$ ticks \emph{proxy}). Para descartar que el problema
+fuera anticipar demasiado pronto, comparamos H60 frente a H120 con idénticas
 secuencias (Tabla~\ref{tab:horizon}).
 
 \begin{table}[H]
@@ -329,188 +366,183 @@ secuencias (Tabla~\ref{tab:horizon}).
 \toprule
 \textbf{Métrica} & \textbf{H60 emparejado} & \textbf{H120} \\
 \midrule
-AUC test                  & $0{,}5651$ & $0{,}4951$ \\
+AUC test                       & $0{,}5651$ & $0{,}4951$ \\
 Top 35\,\% test, coste $0{,}5$ & $+0{,}4262$ & $-1{,}1171$ \\
 Top 35\,\% test, coste $1{,}0$ & $+0{,}0579$ & $-1{,}4910$ \\
 \bottomrule
 \end{tabular}
-\caption{Selección de horizonte (ticks). H120 funciona prácticamente como azar;
-H60 es el único que conserva señal. H240 colapsa todavía más en fresh.}
+\caption{Selección de horizonte (ticks). H120 se comporta de forma próxima al
+azar; H60 es el único que conserva señal. El horizonte H240 colapsa aún más en
+el conjunto fuera de muestra.}
 \label{tab:horizon}
 \end{table}
 
-H120 (y H240) quedan descartados con evidencia: alargar el horizonte no mejora la
-señal. El multi-horizonte se cierra y H60 se mantiene como único candidato.
+Los horizontes largos quedan descartados con evidencia: ampliarlos no mejora la
+señal. El estudio multi-horizonte se cierra y H60 se mantiene como único
+candidato.
 
-\subsection{Especialista prestart H60 (candidato final)}
+\subsection{Especialista de ventana \emph{prestart}}
 
-El candidato final es un especialista para la ventana \emph{prestart}: un
-HistGradientBoosting que combina un regresor de valor esperado (EV) y un
-clasificador de salud de sesión, sobre el conjunto de 36 features
-\texttt{no\_clock} (sin variables de reloj, para evitar fuga temporal trivial).
-La señal se restringe al filtro \texttt{strict\_45\_60\_early}: solo la ventana
-de $-60$ a $-45$ segundos antes de la apertura, con libro sano y coste visible
-acotado. La política congelada es:
+El candidato final es un especialista para la ventana \emph{prestart}: un modelo
+de \emph{gradient boosting} sobre histogramas que combina un regresor de valor
+esperado y un clasificador de salud de sesión, sobre un conjunto de 36
+características sin variables de reloj para evitar fugas temporales triviales. La
+señal se restringe a la ventana comprendida entre $-60$ y $-45$ segundos respecto
+a la apertura, con libro saludable y coste visible acotado. La política congelada
+selecciona operaciones con un valor esperado predicho superior a $0{,}75$ y una
+probabilidad de salud no inferior a $0{,}50$.
 
-\begin{conclusion}
-\begin{verbatim}
-ev_pred > 0.75   (regresor de valor esperado)
-hp_pred >= 0.50  (clasificador de sesión "healthy")
-filtro strict_45_60_early  (ventana prestart -60..-45 s)
-\end{verbatim}
-\end{conclusion}
+\subsection{Filtro de volatilidad}
 
-\subsection{Vol gate}
-
-Al preparar la validación fresh observé un cambio de régimen: la fracción de
-sesiones de alta volatilidad pasó del 18--22\,\% en el corpus de entrenamiento a
-cerca del 58\,\% en fresh (Tabla~\ref{tab:regime}). El modelo se entrenó en un
-régimen de baja volatilidad y sus predicciones en alta volatilidad no son
-fiables en la distribución desplazada. La respuesta es un gate simple de
-volatilidad: operar solo cuando \texttt{perp\_realized\_vol\_bps\_5s} $\le 0{,}6657$
-(el cuantil 80 de la volatilidad de entrenamiento).
+Al preparar la validación fuera de muestra observamos un cambio de régimen: la
+fracción de sesiones de alta volatilidad pasó de un 18--22\,\% en el corpus de
+entrenamiento a aproximadamente un 58\,\% en el conjunto fuera de muestra
+(Tabla~\ref{tab:regime}). El modelo se entrenó en un régimen de baja volatilidad
+y sus predicciones en alta volatilidad no son fiables bajo la distribución
+desplazada. Introducimos un filtro simple de volatilidad que solo habilita la
+operativa cuando la volatilidad realizada a 5~segundos no supera el umbral
+$0{,}6657$, correspondiente al percentil 80 de la volatilidad de entrenamiento.
 
 \begin{table}[H]
 \centering
 \small
 \begin{tabular}{lrl}
 \toprule
-\textbf{Periodo} & \textbf{Fracción HIGH\_VOL} & \textbf{Efecto del gate} \\
+\textbf{Periodo} & \textbf{Fracción alta volatilidad} & \textbf{Efecto del filtro} \\
 \midrule
-train (11--20 may) & 22\,\% & mínimo (el gate casi no actúa) \\
-val (21--22 may)   & 21\,\% & mínimo \\
-test (23--25 may)  & 18\,\% & mínimo \\
-fresh (6--10 jun)  & 58\,\% & \textbf{crítico ($+0{,}73$ de mejora)} \\
+Entrenamiento (11--20 may) & 22\,\% & marginal \\
+Validación (21--22 may)    & 21\,\% & marginal \\
+Test (23--25 may)          & 18\,\% & marginal \\
+Fuera de muestra (6--10 jun) & 58\,\% & \textbf{determinante ($+0{,}73$)} \\
 \bottomrule
 \end{tabular}
-\caption{El cambio de régimen entre entrenamiento y fresh justifica el vol gate.}
+\caption{El cambio de régimen entre entrenamiento y conjunto fuera de muestra
+justifica el filtro de volatilidad.}
 \label{tab:regime}
 \end{table}
 
 % =====================================================================
-\section{RESULTADOS}
+\section{Resultados}
+\label{sec:resultados}
 
-\subsection{Validación fresh out-of-sample}
+\subsection{Validación fuera de muestra}
 
-Sobre los cinco días fresh (6--10 de junio), con el candidato congelado y el vol
-gate, la validación fuera de muestra da:
+Sobre los cinco días del conjunto fuera de muestra (6--10 de junio de 2026), con
+el candidato congelado y el filtro de volatilidad, obtenemos los resultados de la
+Tabla~\ref{tab:fresh}. El intervalo de confianza es bootstrap con 5\,000
+remuestreos y semilla fija; la probabilidad de neto positivo se estima sobre la
+misma distribución de remuestreo.
 
-\begin{conclusion}
-\begin{verbatim}
-n = 318 trades, 5 días (6-10 jun), ~63,6 trades/día
-Net@0.5  = +1,069 ticks/trade      Net@0.25 = +0,819 ticks/trade
-IC 90%   = [+0,472, +1,654]        P(neto > 0) = 99,8%
-Días positivos = 5/5               Drawdown máx = 88,1 ticks
-Sin vol gate: +0,349  ->  el gate aporta +0,72 ticks
-\end{verbatim}
-\end{conclusion}
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Operaciones ($n$)                 & 318 \\
+Días de soporte                   & 5 (5/5 positivos) \\
+Neto medio (coste $0{,}5$)        & $+1{,}069$ ticks \\
+Neto medio (coste $0{,}25$)       & $+0{,}819$ ticks \\
+Intervalo de confianza 90\,\%     & $[+0{,}472,\ +1{,}654]$ \\
+$P(\text{neto} > 0)$ (bootstrap)  & 99,8\,\% \\
+Drawdown máximo                   & 88,1 ticks \\
+Neto medio sin filtro de volatilidad & $+0{,}349$ ticks \\
+\bottomrule
+\end{tabular}
+\caption{Validación fuera de muestra del candidato congelado (ticks netos por
+operación). El filtro de volatilidad aporta $+0{,}72$ ticks, la mayor parte de la
+ventaja, precisamente por el cambio de régimen observado.}
+\label{tab:fresh}
+\end{table}
 
-El intervalo de confianza es bootstrap (5\,000 remuestreos, semilla fija) y la
-probabilidad de neto positivo se estima sobre esa misma distribución. El soporte
-son cinco días: es corto y se indica siempre junto al resultado. El gate aporta
-la mayor parte de la mejora precisamente porque el régimen fresh cambió; sin él,
-el neto cae a $+0{,}349$.
+El soporte es de cinco días. Se trata de un soporte reducido y lo reportamos
+explícitamente junto a cada resultado. El filtro de volatilidad aporta la mayor
+parte de la ventaja porque el régimen del conjunto fuera de muestra difiere del de
+entrenamiento; sin él, el neto medio desciende a $+0{,}349$ ticks.
 
-\subsection{Negativos valiosos: adaptación al régimen}
+\subsection{Experimentos de adaptación al régimen}
 
-Probé varias formas de adaptar el modelo al nuevo régimen: reentrenamiento
-walk-forward continuo, CORAL, gate conformal, ensemble bootstrap, vol gate
-adaptativo, features normalizadas por volatilidad y distillation de un TCN. Todas
-resultaron \texttt{NO\_GO}: ninguna superó de forma robusta al modelo congelado
-con el gate simple. La conclusión es interesante por sí misma:
+Evaluamos varias estrategias para adaptar el modelo al nuevo régimen:
+reentrenamiento incremental con ventana móvil, alineación de correlaciones CORAL
+\cite{sun2016coral}, un filtro conformal, un \emph{ensemble} por \emph{bootstrap},
+un filtro de volatilidad adaptativo, características normalizadas por volatilidad y
+\emph{distillation} de una red convolucional temporal. Ninguna superó de forma
+robusta al modelo congelado con el filtro simple. Reportamos este resultado
+negativo porque es informativo: con un horizonte de datos reducido, la
+combinación de un modelo congelado y un filtro simple supera a la adaptación de
+dominio sofisticada, que requiere más datos de los disponibles para estimarse de
+forma fiable.
 
-\begin{conclusion}
-\begin{verbatim}
-Con pocos días de datos, un modelo congelado + un gate simple supera a la
-adaptación sofisticada. Adaptarse a un régimen exige más datos de los que hay.
-\end{verbatim}
-\end{conclusion}
+\subsection{Seguimiento \emph{paper-shadow}}
 
-\subsection{Paper shadow y gates de decisión}
-
-La infraestructura final es un \emph{paper shadow ledger}: registro operación a
-operación, resumen diario y gates de promoción cuantitativos. Los gates son
-deliberadamente conservadores y exigen soporte, no solo neto positivo:
-
-\begin{itemize}
-  \item \texttt{PAPER\_SHADOW\_CANDIDATE}: net@0.5 $> 0{,}5$ y $\ge 200$ trades y $\ge 8$ días.
-  \item \texttt{BOT\_CANDIDATE}: net@0.5 $> 0{,}5$ y $\ge 400$ trades y $\ge 12$ días.
-\end{itemize}
-
-Con cinco días, el candidato queda en \texttt{PROMISING\_NEEDS\_DATA}: por falta
-de soporte temporal, no por falta de señal. Esto es exactamente lo que la
-metodología debe reportar; forzar una promoción aquí sería deshonesto.
-
-% =====================================================================
-\section{CONSIDERACIONES ÉTICAS}
-
-Este sistema toma decisiones económicas automatizadas y es especialmente
-sensible al sobreajuste cuando hay pocos datos, dos riesgos que ya señalé en el
-trabajo de la asignatura de Ética sobre este mismo proyecto. La memoria es
-coherente con aquello: el proyecto se detiene deliberadamente en paper shadow y
-no opera con capital real.
-
-Sigo el marco de confidencialidad, integridad y disponibilidad. La integridad de
-los datos me preocupa tanto como el modelo: un dato externo retrasado o
-incorrecto puede generar una señal falsa y, con ella, una pérdida. Por eso el
-sistema entrena solo con sesiones aceptadas, separa datos crudos de features y
-labels, mantiene trazabilidad de artefactos y define límites para no operar con
-datos \emph{stale}. Las recomendaciones de Arp et al. \cite{arp2022dos} ---definir
-bien el problema, cuidar el etiquetado, usar baselines, evitar comparaciones
-injustas--- se aplican a lo largo de todo el trabajo. El proyecto no usa datos
-personales: solo datos públicos de mercado.
+La infraestructura de evaluación final es un registro \emph{paper-shadow}:
+contabilidad operación a operación, resumen diario y reglas de promoción
+cuantitativas. Las reglas son deliberadamente conservadoras y exigen soporte
+temporal, no solo neto positivo: la promoción a candidato de seguimiento requiere
+un neto superior a $0{,}5$ ticks, al menos 200 operaciones y al menos 8 días. Con
+cinco días, el candidato permanece en estado \emph{prometedor pero con datos
+insuficientes}, por falta de soporte temporal y no por ausencia de señal. Forzar
+la promoción en este punto sería metodológicamente incorrecto.
 
 % =====================================================================
-\section{CONCLUSIONES, LÍMITES Y TRABAJO FUTURO}
+\section{Discusión y limitaciones}
 
-\subsection{Conclusión}
+El límite principal de este trabajo es el soporte temporal del conjunto fuera de
+muestra: cinco días. Aunque el intervalo de confianza es estrecho y los cinco días
+son positivos, cinco días no constituyen una validación definitiva, y así lo
+reportamos. El resultado es además específico de la ventana \emph{prestart} y del
+régimen capturado; un cambio de régimen suficientemente grande podría invalidar el
+filtro de volatilidad, como ilustra el propio desplazamiento observado entre el
+entrenamiento y el conjunto fuera de muestra. Finalmente, la validación es
+\emph{offline} bajo un modelo de ejecución conservador pero simplificado; una
+validación con ejecución simulada de mayor fidelidad (ejecuciones parciales,
+dinámica de cola) es trabajo pendiente.
 
-\begin{conclusion}
-\begin{verbatim}
-Se construyó una metodología completa de captura, validación temporal y control
-de costes para mercados BTC de Polymarket. Los baselines direccionales mueren
-con latencia realista; el deep learning aporta representación pero no una
-política rentable con ~15 días de datos. Un especialista tabular congelado con
-gate de volatilidad sí sobrevive a 5 días out-of-sample puros (+1,07 ticks
-netos/trade, 5/5 días positivos) y queda en seguimiento paper-shadow con gates
-cuantitativos hacia un posible bot. No se afirma rentabilidad real: se entrega
-la metodología, la evidencia y sus límites.
-\end{verbatim}
-\end{conclusion}
-
-\subsection{Límites}
-
-El límite más importante es el soporte temporal: cinco días fresh. El intervalo
-de confianza es estrecho y los cinco días son positivos, pero cinco días no son
-una validación definitiva, y así se reporta. Además, el resultado es específico
-de la ventana prestart y del régimen capturado; un cambio de régimen mayor
-podría invalidar el gate, como el propio cambio entre entrenamiento y fresh
-demuestra.
-
-\subsection{Trabajo futuro}
-
-Las líneas abiertas son: ampliar el soporte fresh hasta alcanzar los gates de
-\texttt{PAPER\_SHADOW\_CANDIDATE}; validar un patrón en U observado en la
-volatilidad dentro del gate (la volatilidad muy baja concentra la mayor parte del
-PnL), que de momento se deja como \emph{hipótesis} y no como resultado por
-descansar en solo cinco días; y revisitar el Deep Learning secuencial con 60 o
-más días de datos, condicionado a que supere al especialista tabular bajo el
-mismo protocolo.
+Observamos también un patrón en forma de U en la relación entre volatilidad y
+beneficio dentro del intervalo habilitado por el filtro, en el que la volatilidad
+muy baja concentra la mayor parte del beneficio. Dado que descansa sobre cinco
+días, lo dejamos como hipótesis a validar y no como resultado.
 
 % =====================================================================
-\section{REPRODUCIBILIDAD}
+\section{Consideraciones éticas}
 
-El repositorio asociado replica la estructura de un proyecto de MLOps visto en el
-máster: un paquete \texttt{src/edgerunner/} con la política congelada, el modelo
-de costes y los gates extraídos y testeados (pytest); 18 documentos canónicos del
-arco; 8 notebooks pedagógicos ejecutados; los scripts reproducibles de cada
-peldaño; el esquema SQL; y los registros de resultados (\texttt{key\_results.csv}
-y \texttt{decision\_register.csv}) filtrados al arco. Los umbrales congelados
-viven en \texttt{config/frozen\_policy\_thresholds.yaml} y no se modifican en
-código. El registro de experimentos y decisiones reduce la deuda técnica
-inherente a estos sistemas \cite{sculley2015debt}: una pequeña diferencia en
-sampling o en labels puede cambiar por completo el resultado, y por eso queda
-trazada.
+El sistema toma decisiones económicas automatizadas y es especialmente sensible al
+sobreajuste cuando el horizonte de datos es reducido. Por ello el trabajo se
+detiene deliberadamente en la fase de \emph{paper-shadow} y no opera con capital
+real. Adoptamos un marco de confidencialidad, integridad y disponibilidad, y
+tratamos la integridad de los datos como tan crítica como el propio modelo: una
+referencia externa retrasada o errónea puede inducir una señal espuria y, con
+ella, una pérdida. En consecuencia, el sistema se entrena únicamente con sesiones
+aceptadas, separa los datos crudos de las características y las etiquetas, mantiene
+trazabilidad de los artefactos y define umbrales para inhibir la operativa ante
+datos obsoletos. El trabajo no emplea datos personales: utiliza exclusivamente
+datos públicos de mercado.
+
+% =====================================================================
+\section{Conclusiones}
+
+Hemos presentado una metodología completa de captura de datos, validación temporal
+y control de costes para la predicción de corto plazo en los mercados de Bitcoin
+de Polymarket. Nuestra observación central es que los clasificadores
+direccionales, pese a una precisión cercana al 90\,\%, dejan de ser rentables bajo
+una latencia de entrada realista: el coste y la ejecución, y no el acierto,
+determinan el resultado. El aprendizaje profundo sobre secuencias y libro de
+órdenes aporta capacidad de representación, pero no una política rentable y
+estable con un horizonte de datos de unas dos semanas. Un especialista tabular
+congelado, combinado con un filtro de volatilidad, sí sobrevive a una validación
+fuera de muestra de cinco días ($+1{,}069$ ticks netos por operación, cinco de
+cinco días positivos), y queda en seguimiento \emph{paper-shadow} con reglas de
+promoción cuantitativas. No afirmamos rentabilidad real: la aportación de este
+trabajo es la metodología, la evidencia obtenida bajo un protocolo honesto y la
+delimitación explícita de sus límites. Como trabajo futuro proponemos ampliar el
+soporte temporal del conjunto fuera de muestra, validar el patrón en U de la
+volatilidad y reevaluar las arquitecturas profundas con un horizonte de datos
+sustancialmente mayor, condicionado a que superen al especialista tabular bajo el
+mismo protocolo. El código, los registros de resultados y los artefactos
+necesarios para reproducir el trabajo se publican junto a este artículo, siguiendo
+prácticas de trazabilidad que mitigan la deuda técnica inherente a estos sistemas
+\cite{sculley2015debt}.
 
 % =====================================================================
 \begin{thebibliography}{99}
@@ -526,41 +558,64 @@ Polymarket Documentation. \textit{Order Lifecycle.}
 \bibitem{wolfers2004prediction}
 J. Wolfers and E. Zitzewitz. \textit{Prediction Markets.}
 Journal of Economic Perspectives, 18(2), 107--126, 2004.
-\url{https://www.nber.org/papers/w10504}
 
 \bibitem{zhang2019deeplob}
 Z. Zhang, S. Zohren and S. Roberts.
 \textit{DeepLOB: Deep Convolutional Neural Networks for Limit Order Books.}
 IEEE Transactions on Signal Processing, 67(11), 3001--3012, 2019.
-\url{https://arxiv.org/abs/1808.03668}
+
+\bibitem{ntakaris2018}
+A. Ntakaris, M. Magris, J. Kanniainen, M. Gabbouj and A. Iosifidis.
+\textit{Benchmark dataset for mid-price forecasting of limit order book data with
+machine learning methods.} Journal of Forecasting, 37(8), 852--866, 2018.
+
+\bibitem{tsantekidis2017}
+A. Tsantekidis, N. Passalis, A. Tefas, J. Kanniainen, M. Gabbouj and A. Iosifidis.
+\textit{Using deep learning to detect price change indications in financial
+markets.} European Signal Processing Conference (EUSIPCO), 2017.
 
 \bibitem{sirignano2019universal}
 J. Sirignano and R. Cont.
-\textit{Universal features of price formation in financial markets: perspectives from deep learning.}
-Quantitative Finance, 19(9), 1449--1459, 2019.
+\textit{Universal features of price formation in financial markets: perspectives
+from deep learning.} Quantitative Finance, 19(9), 1449--1459, 2019.
 
 \bibitem{jha2020digital}
 R. Jha et al. \textit{Deep Learning for Digital Asset Limit Order Books.}
 arXiv:2010.01241, 2020.
 
+\bibitem{kearns2013}
+M. Kearns and Y. Nevmyvaka.
+\textit{Machine Learning for Market Microstructure and High Frequency Trading.}
+In High Frequency Trading: New Realities for Traders, Markets and Regulators, 2013.
+
+\bibitem{gu2020empirical}
+S. Gu, B. Kelly and D. Xiu.
+\textit{Empirical Asset Pricing via Machine Learning.}
+The Review of Financial Studies, 33(5), 2223--2273, 2020.
+
+\bibitem{lopezdeprado2018}
+M. López de Prado. \textit{Advances in Financial Machine Learning.}
+Wiley, 2018.
+
+\bibitem{bailey2014deflated}
+D. H. Bailey and M. López de Prado.
+\textit{The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest
+Overfitting, and Non-Normality.}
+The Journal of Portfolio Management, 40(5), 94--107, 2014.
+
+\bibitem{sun2016coral}
+B. Sun, J. Feng and K. Saenko.
+\textit{Return of Frustratingly Easy Domain Adaptation.}
+AAAI Conference on Artificial Intelligence, 2016.
+
 \bibitem{lim2021tft}
 B. Lim, S. O. Arik, N. Loeff and T. Pfister.
-\textit{Temporal Fusion Transformers for Interpretable Multi-horizon Time Series Forecasting.}
-International Journal of Forecasting, 37(4), 1748--1764, 2021.
-\url{https://arxiv.org/abs/1912.09363}
-
-\bibitem{pendlebury2019tesseract}
-F. Pendlebury, F. Pierazzi, R. Jordaney, J. Kinder and L. Cavallaro.
-\textit{TESSERACT: Eliminating Experimental Bias in Malware Classification across Space and Time.}
-USENIX Security, 2019.
-
-\bibitem{arp2022dos}
-D. Arp et al. \textit{Dos and Don'ts of Machine Learning in Computer Security.}
-USENIX Security, 2022.
+\textit{Temporal Fusion Transformers for Interpretable Multi-horizon Time Series
+Forecasting.} International Journal of Forecasting, 37(4), 1748--1764, 2021.
 
 \bibitem{sculley2015debt}
 D. Sculley et al. \textit{Hidden Technical Debt in Machine Learning Systems.}
-NeurIPS, 2015.
+Advances in Neural Information Processing Systems (NeurIPS), 2015.
 
 \end{thebibliography}
 
