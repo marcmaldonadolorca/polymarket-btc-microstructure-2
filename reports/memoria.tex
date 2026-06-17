@@ -291,19 +291,25 @@ baja?'': necesita saber cuánto vale la operación y si el entorno en el que va 
 ejecutarse es favorable.
 
 \begin{enumerate}[noitemsep]
-  \item \textbf{Regresor de valor esperado} (\texttt{exec\_net\_cost\_H60}):
-  neto ejecutado a horizonte H60 descontado el coste de referencia de $0{,}5$~ticks.
+  \item \textbf{Regresor de valor esperado} (\texttt{exec\_net\_cost\_0p25\_H60}):
+  el neto ejecutado a horizonte H60 tras descontar una fracción ($0{,}25$) del coste
+  visible de entrada de cada operación. Los niveles de coste mayores ($0{,}5$ y
+  $1{,}0$) se reservan para \emph{reportar} los resultados finales, no para entrenar.
   Un valor predicho positivo indica que el modelo anticipa una operación rentable
-  bajo el modelo de costes; el regresor aprende cuándo hay suficiente movimiento
-  para superar el spread y la comisión.
+  bajo el modelo de costes; el regresor aprende cuándo hay suficiente movimiento para
+  superar el coste de cruzar el libro.
 
-  \item \textbf{Clasificador de salud de sesión}
-  (\texttt{healthy\_fill\_proxy\_H60}): variable binaria construida como el signo
-  del neto bajo el coste conservador de $0{,}25$~ticks. Actúa como segundo filtro
-  independiente: descarta operaciones en las que el entorno de ejecución es adverso
-  incluso si el valor esperado predicho es positivo. La independencia entre ambas
-  cabezas es deliberada: una operación puede tener alto EV predicho pero baja
-  probabilidad de relleno saludable si el libro está degradado.
+  \item \textbf{Clasificador de salud de la operación}
+  (\texttt{healthy\_fill\_proxy\_0p25\_H60}): variable binaria que vale 1 cuando el
+  neto (al mismo coste $0{,}25$) es positivo \emph{y} la operación no cae en el peor
+  cuartil de un grupo de operaciones comparables (mismo bloque temporal, temporalidad,
+  fase de ventana, nivel de spread, de microprice y de momento del perp a 2~s). No
+  basta con ganar: se exige ganar de forma robusta respecto a situaciones parecidas,
+  lo que descarta los positivos frágiles de la cola. Actúa como segundo filtro
+  independiente: rechaza operaciones con entorno de ejecución adverso aunque el valor
+  esperado predicho sea positivo. La independencia entre ambas cabezas es deliberada:
+  una operación puede tener alto EV predicho y baja probabilidad de relleno sano si el
+  libro está degradado.
 \end{enumerate}
 
 Partir el problema en dos objetivos nos deja ser exigentes en dos frentes que no
@@ -330,8 +336,11 @@ emparejamiento fue de unos $0{,}43$~segundos en el percentil 95 de la muestra
 válida. Aun así, por prudencia trabajamos con cifras peores: una latencia
 conceptual de modelado de un segundo y una latencia observable en los datos de dos
 segundos. Esta última coincide con la malla de captura, lo que hace la evaluación
-deliberadamente conservadora. El coste de referencia por operación es de $0{,}5$
-ticks, y como contraste optimista usamos $0{,}25$ ticks.
+deliberadamente conservadora. El coste de ejecución no se fija como un número plano
+de ticks, sino como una fracción del coste visible de entrada de cada operación
+(la mitad de ese coste como referencia, un cuarto como contraste optimista y el
+coste completo como prueba de estrés). Modelar el coste relativo al libro de cada
+instante es más fiel que asumir un coste fijo igual para todas las operaciones.
 
 \subsection{Protocolo de congelación}
 
@@ -522,11 +531,13 @@ sobre el mismo conjunto de 36 características sin variables de reloj
 (\emph{no\_clock}):
 
 \begin{enumerate}[noitemsep]
-  \item \textbf{Regresor EV} (objetivo \texttt{exec\_net\_cost\_H60}): predice
-  el neto esperado de la operación bajo el coste de referencia de $0{,}5$~ticks.
+  \item \textbf{Regresor EV} (objetivo \texttt{exec\_net\_cost\_0p25\_H60}): predice
+  el neto esperado de la operación tras descontar $0{,}25$ veces el coste visible de
+  entrada. El umbral de la política ($\text{EV}>0{,}75$) opera sobre esta predicción.
   \item \textbf{Clasificador \emph{healthy}} (objetivo
-  \texttt{healthy\_fill\_proxy\_H60}): predice la probabilidad de que el relleno
-  sea favorable bajo el coste conservador de $0{,}25$~ticks.
+  \texttt{healthy\_fill\_proxy\_0p25\_H60}): predice la probabilidad de que la
+  operación sea \emph{sana}, esto es, neto positivo y fuera del peor cuartil de su
+  grupo de operaciones comparables.
 \end{enumerate}
 
 La elección de HistGradientBoosting frente a otras librerías de \emph{gradient
