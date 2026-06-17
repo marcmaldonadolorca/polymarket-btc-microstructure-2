@@ -26,8 +26,9 @@ PROMISING_NEEDS_DATA
 | Fresh days | 5 |
 | Days range | 2026-06-06 to 2026-06-10 |
 | Total trades (vol gate) | 318 |
-| Mean net@0.5 | +1.069 ticks |
-| Mean net@0.25 | +0.819 ticks |
+| Mean net@0.25 (optimista) | +1.255 ticks |
+| Mean net@0.5 (referencia) | +1.069 ticks |
+| Mean net@1.0 (estrés) | +0.697 ticks |
 | Max drawdown (ticks) | 88.1 |
 | Worst day net/trade | +0.025 ticks |
 | Best day net/trade | +3.572 ticks |

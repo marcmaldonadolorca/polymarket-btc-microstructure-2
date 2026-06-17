@@ -57,7 +57,8 @@ datos no usados en la selección:
 
 ```text
 n = 318 trades, 5 días (6-10 jun 2026), ~63.6 trades/día
-Net@0.5  = +1.069 ticks/trade      Net@0.25 = +0.819 ticks/trade
+Net@0.5  = +1.069 ticks/trade (referencia)
+Sensibilidad al coste: @0.25 = +1.255   @0.5 = +1.069   @1.0 = +0.697 (estrés)
 IC 90%   = [+0.472, +1.654]        P(neto > 0) = 99.8%
 Días positivos = 5/5               Drawdown máx = 88.1 ticks
 Sin vol gate: +0.349  ->  el gate aporta +0.72 ticks
