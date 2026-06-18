@@ -68,18 +68,6 @@ Decisión = PROMISING_NEEDS_DATA (faltan días para PAPER_SHADOW_CANDIDATE)
 La política está **congelada** y no se reentrena para "mejorar" estos números
 (ver [`config/frozen_policy_thresholds.yaml`](config/frozen_policy_thresholds.yaml)).
 
-## Frase defendible
-
-```text
-Se construyó una metodología completa de captura, validación temporal y control
-de costes para mercados BTC de Polymarket. Los baselines direccionales mueren
-con latencia realista; el deep learning aporta representación pero no una
-política rentable con ~15 días de datos. Un especialista tabular congelado con
-gate de volatilidad sí sobrevive a 5 días out-of-sample puros (+1.07 ticks
-netos/trade, 5/5 días positivos) y queda en seguimiento paper-shadow con gates
-cuantitativos hacia un posible bot. No se afirma rentabilidad real: se entrega
-la metodología, la evidencia y sus límites.
-```
 
 ## Estructura del repositorio
 
