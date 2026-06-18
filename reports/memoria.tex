@@ -604,7 +604,7 @@ decir, un umbral fijado con los datos viejos, no ajustado a los nuevos.
 Entrenamiento (11--20 may) & 22\,\% & marginal \\
 Validación (21--22 may)    & 21\,\% & marginal \\
 Test (23--25 may)          & 18\,\% & marginal \\
-Fuera de muestra (6--10 jun) & 58\,\% & \textbf{determinante ($+0{,}73$)} \\
+Fuera de muestra (6--10 jun) & 58\,\% & \textbf{determinante ($+0{,}72$)} \\
 \bottomrule
 \end{tabular}
 \caption{El cambio de régimen entre entrenamiento y conjunto fuera de muestra
@@ -639,7 +639,7 @@ Neto medio (coste $1{,}0$, estrés)        & $+0{,}697$ ticks \\
 Intervalo de confianza 90\,\%     & $[+0{,}472,\ +1{,}654]$ \\
 $P(\text{neto} > 0)$ (bootstrap)  & 99,8\,\% \\
 Drawdown máximo                   & 88,1 ticks \\
-Neto medio sin filtro de volatilidad & $+0{,}349$ ticks \\
+Neto medio sin filtro de volatilidad (coste $0{,}5$) & $+0{,}349$ ticks \\
 \bottomrule
 \end{tabular}
 \caption{Validación fuera de muestra del candidato congelado (ticks netos por
@@ -729,8 +729,9 @@ rentabilidad real, y esa contención es parte del mensaje: lo que se entrega es 
 metodología, la evidencia obtenida con un protocolo honesto y los límites dibujados
 sin disimulo. El camino a partir de aquí está claro: ampliar el soporte temporal
 fuera de muestra, comprobar si el patrón en U de la volatilidad se sostiene y volver
-a probar las arquitecturas profundas con muchos más días ---pero solo si consiguen
-ganarle al especialista tabular bajo el mismo protocolo. El código, los registros de
+a probar las arquitecturas profundas (por ejemplo, transformers temporales como el
+\emph{Temporal Fusion Transformer} \cite{lim2021tft}) con muchos más días, pero solo
+si consiguen ganarle al especialista tabular bajo el mismo protocolo. El código, los registros de
 resultados y los artefactos para reproducir el trabajo se publican junto a este
 artículo, con las prácticas de trazabilidad que ayudan a contener la deuda técnica
 propia de estos sistemas \cite{sculley2015debt}.
