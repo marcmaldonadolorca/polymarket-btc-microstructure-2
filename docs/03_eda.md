@@ -247,7 +247,7 @@ Resultado de decision:
 ## EDA 06: completada
 
 Informe asociado:
-[EDA_06_PM_FEATURE_COVERAGE.md](EDA_06_PM_FEATURE_COVERAGE.md)
+EDA_06_PM_FEATURE_COVERAGE.md
 
 `06_pm_feature_coverage_and_distributions.ipynb` ya se ejecuto sobre todo
 `core`.
@@ -264,7 +264,7 @@ Resultado de decision:
 ## EDA 07: completada
 
 Informe asociado:
-[EDA_07_CROSS_VENUE_AUDIT.md](EDA_07_CROSS_VENUE_AUDIT.md)
+EDA_07_CROSS_VENUE_AUDIT.md
 
 `07_cross_venue_feature_audit.ipynb` ya se ejecuto sobre todo `core`.
 
@@ -281,7 +281,7 @@ Resultado de decision:
 ## EDA 08 quick: completada
 
 Informe asociado:
-[EDA_08_PM_EXTERNAL_SIGNAL_STABILITY_QUICK.md](EDA_08_PM_EXTERNAL_SIGNAL_STABILITY_QUICK.md)
+EDA_08_PM_EXTERNAL_SIGNAL_STABILITY_QUICK.md
 
 `08_pm_external_signal_stability_quick.ipynb` ya se ejecuto en una muestra
 corta de `93.496` filas con soporte H16 exacto.
@@ -297,7 +297,7 @@ Resultado de decision:
 ## EDA 08b: siguiente paso inmediato recomendado
 
 Informe asociado:
-[EDA_08B_PM_EXTERNAL_BALANCED_COST_QUICK.md](EDA_08B_PM_EXTERNAL_BALANCED_COST_QUICK.md)
+EDA_08B_PM_EXTERNAL_BALANCED_COST_QUICK.md
 
 `08b_pm_external_signal_stability_folds_quick.ipynb` ya se ejecuto con muestra
 balanceada por `terminal_split + temporality` y coste visible.
@@ -313,7 +313,7 @@ Resultado de decision:
 ## EDA 09: siguiente paso inmediato recomendado
 
 Informe asociado:
-[EDA_09_ACTION_UNIT_EVALUATION_QUICK.md](EDA_09_ACTION_UNIT_EVALUATION_QUICK.md)
+EDA_09_ACTION_UNIT_EVALUATION_QUICK.md
 
 `09_action_unit_and_evaluation_quick.ipynb` ya se ejecuto en muestra corta.
 
@@ -329,7 +329,7 @@ Resultado de decision:
 ## Baseline contract v0: completado
 
 Documento asociado:
-[BASELINE_CONTRACT_V0.md](BASELINE_CONTRACT_V0.md)
+BASELINE_CONTRACT_V0.md
 
 El contrato ya cierra:
 
@@ -344,10 +344,10 @@ El contrato ya cierra:
 ## Baseline offline v0: completado en modo quick
 
 Informe asociado:
-[BASELINE_V0_QUICK_RESULTS.md](BASELINE_V0_QUICK_RESULTS.md)
+BASELINE_V0_QUICK_RESULTS.md
 
 Notebook asociado:
-[`../notebooks/11_first_offline_baseline_v0.ipynb`](../notebooks/11_first_offline_baseline_v0.ipynb)
+`../notebooks/11_first_offline_baseline_v0.ipynb`
 
 Resultado de decision:
 
@@ -374,12 +374,12 @@ Hacer una iteracion corta de robustez:
 ## Baseline v0 full-core robustness: completado
 
 Informe asociado:
-[BASELINE_V0_FULL_CORE_ROBUSTNESS.md](BASELINE_V0_FULL_CORE_ROBUSTNESS.md)
+BASELINE_V0_FULL_CORE_ROBUSTNESS.md
 
 Notebooks:
 
-- [`../notebooks/12_baseline_v0_full_core_robustness.ipynb`](../notebooks/12_baseline_v0_full_core_robustness.ipynb)
-- [`../notebooks/13_baseline_v0_feature_sanity_addendum.ipynb`](../notebooks/13_baseline_v0_feature_sanity_addendum.ipynb)
+- `../notebooks/12_baseline_v0_full_core_robustness.ipynb`
+- `../notebooks/13_baseline_v0_feature_sanity_addendum.ipynb`
 
 Resultado de decision:
 
@@ -396,10 +396,10 @@ Resultado de decision:
 ## Baseline v0.1 threshold/bootstrap: completado
 
 Informe asociado:
-[BASELINE_V01_THRESHOLD_BOOTSTRAP.md](BASELINE_V01_THRESHOLD_BOOTSTRAP.md)
+BASELINE_V01_THRESHOLD_BOOTSTRAP.md
 
 Notebook:
-[`../notebooks/14_baseline_v01_threshold_bootstrap.ipynb`](../notebooks/14_baseline_v01_threshold_bootstrap.ipynb)
+`../notebooks/14_baseline_v01_threshold_bootstrap.ipynb`
 
 Resultado de decision:
 
@@ -413,10 +413,10 @@ Resultado de decision:
 ## Baseline v0.2 conservative backtest: completado
 
 Informe asociado:
-[BASELINE_V02_CONSERVATIVE_BACKTEST.md](BASELINE_V02_CONSERVATIVE_BACKTEST.md)
+BASELINE_V02_CONSERVATIVE_BACKTEST.md
 
 Notebook:
-[`../notebooks/15_baseline_v02_conservative_backtest.ipynb`](../notebooks/15_baseline_v02_conservative_backtest.ipynb)
+`../notebooks/15_baseline_v02_conservative_backtest.ipynb`
 
 Resultado de decision:
 
@@ -435,10 +435,10 @@ Resultado de decision:
 ## Baseline v0.3 dataset contract: completado
 
 Informe asociado:
-[BASELINE_V03_DATASET_CONTRACT.md](BASELINE_V03_DATASET_CONTRACT.md)
+BASELINE_V03_DATASET_CONTRACT.md
 
 Notebook:
-[`../notebooks/16_baseline_v03_dataset_contract.ipynb`](../notebooks/16_baseline_v03_dataset_contract.ipynb)
+`../notebooks/16_baseline_v03_dataset_contract.ipynb`
 
 Resultado de decision:
 
@@ -456,10 +456,10 @@ Resultado de decision:
 ## Baseline v0.3 model runner: completado
 
 Informe asociado:
-[BASELINE_V03_MODEL_RUNNER.md](BASELINE_V03_MODEL_RUNNER.md)
+BASELINE_V03_MODEL_RUNNER.md
 
 Notebook:
-[`../notebooks/17_baseline_v03_model_runner.ipynb`](../notebooks/17_baseline_v03_model_runner.ipynb)
+`../notebooks/17_baseline_v03_model_runner.ipynb`
 
 Resultado de decision:
 
@@ -475,10 +475,10 @@ Resultado de decision:
 ## Baseline v0.3b error/calibration: completado
 
 Informe asociado:
-[BASELINE_V03B_ERROR_CALIBRATION.md](BASELINE_V03B_ERROR_CALIBRATION.md)
+BASELINE_V03B_ERROR_CALIBRATION.md
 
 Notebook:
-[`../notebooks/18_baseline_v03b_error_calibration.ipynb`](../notebooks/18_baseline_v03b_error_calibration.ipynb)
+`../notebooks/18_baseline_v03b_error_calibration.ipynb`
 
 Resultado de decision:
 
@@ -494,10 +494,10 @@ Resultado de decision:
 ## Baseline v0.3c policy fold validation: completado
 
 Informe asociado:
-[BASELINE_V03C_POLICY_FOLD_VALIDATION.md](BASELINE_V03C_POLICY_FOLD_VALIDATION.md)
+BASELINE_V03C_POLICY_FOLD_VALIDATION.md
 
 Notebook:
-[`../notebooks/19_baseline_v03c_policy_fold_validation.ipynb`](../notebooks/19_baseline_v03c_policy_fold_validation.ipynb)
+`../notebooks/19_baseline_v03c_policy_fold_validation.ipynb`
 
 Resultado de decision:
 
@@ -513,10 +513,10 @@ Resultado de decision:
 ## Baseline v0.3d execution stress: completado
 
 Informe asociado:
-[BASELINE_V03D_EXECUTION_STRESS.md](BASELINE_V03D_EXECUTION_STRESS.md)
+BASELINE_V03D_EXECUTION_STRESS.md
 
 Notebook:
-[`../notebooks/20_baseline_v03d_execution_stress.ipynb`](../notebooks/20_baseline_v03d_execution_stress.ipynb)
+`../notebooks/20_baseline_v03d_execution_stress.ipynb`
 
 Resultado de decision:
 
@@ -532,15 +532,15 @@ Resultado de decision:
   target/modelo consciente de latencia, no bot.
 
 Estrategia asociada:
-[ESTRATEGIA_LATENCIA_Y_SIGUIENTE_FASE.md](ESTRATEGIA_LATENCIA_Y_SIGUIENTE_FASE.md)
+ESTRATEGIA_LATENCIA_Y_SIGUIENTE_FASE.md
 
 ## Notebook unificado de presentacion
 
 Notebook asociado:
-[`../notebooks/00_edgerunner_unified_eda_baselines.ipynb`](../notebooks/00_edgerunner_unified_eda_baselines.ipynb)
+`../notebooks/00_edgerunner_unified_eda_baselines.ipynb`
 
 Guia:
-[NOTEBOOK_UNIFICADO_EDA_BASELINES.md](NOTEBOOK_UNIFICADO_EDA_BASELINES.md)
+NOTEBOOK_UNIFICADO_EDA_BASELINES.md
 
 Uso:
 
@@ -598,8 +598,8 @@ No pasaremos a baseline hasta poder responder por escrito:
 ## Relacion con las otras guias
 
 - Inventario y synthetics:
-  [GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md](GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md).
+  GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md.
 - Splits:
-  [GUIA_02_SPLITS_Y_VALIDACION.md](GUIA_02_SPLITS_Y_VALIDACION.md).
+  GUIA_02_SPLITS_Y_VALIDACION.md.
 - Labels, horizontes, `flat` y coste:
-  [GUIA_04_LABELS_TARGETS_Y_COSTES.md](GUIA_04_LABELS_TARGETS_Y_COSTES.md).
+  GUIA_04_LABELS_TARGETS_Y_COSTES.md.

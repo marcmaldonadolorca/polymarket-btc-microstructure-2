@@ -6,25 +6,25 @@ Estado: documento de exploracion y decision previa a experimentos offline.
 
 Guias pedagogicas actuales:
 
-- [GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md](GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md)
-- [GUIA_02_SPLITS_Y_VALIDACION.md](GUIA_02_SPLITS_Y_VALIDACION.md)
-- [GUIA_03_PLAN_DE_ANALISIS_EXPLORATORIO.md](GUIA_03_PLAN_DE_ANALISIS_EXPLORATORIO.md)
-- [GUIA_04_LABELS_TARGETS_Y_COSTES.md](GUIA_04_LABELS_TARGETS_Y_COSTES.md)
-- [BASELINE_CONTRACT_V0.md](BASELINE_CONTRACT_V0.md)
+- GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md
+- GUIA_02_SPLITS_Y_VALIDACION.md
+- GUIA_03_PLAN_DE_ANALISIS_EXPLORATORIO.md
+- GUIA_04_LABELS_TARGETS_Y_COSTES.md
+- BASELINE_CONTRACT_V0.md
 
 Este documento queda como mapa tecnico detallado. Para entender el contexto
 desde cero, empezar por las cuatro guias anteriores.
 
 Notebooks asociados:
 
-- [03_target_contract_and_feature_map.ipynb](../notebooks/03_target_contract_and_feature_map.ipynb)
-- [04_alternative_target_exploration.ipynb](../notebooks/04_alternative_target_exploration.ipynb)
-- [05_core_target_stability.ipynb](../notebooks/05_core_target_stability.ipynb)
-- [06_pm_feature_coverage_and_distributions.ipynb](../notebooks/06_pm_feature_coverage_and_distributions.ipynb)
-- [07_cross_venue_feature_audit.ipynb](../notebooks/07_cross_venue_feature_audit.ipynb)
-- [08_pm_external_signal_stability_quick.ipynb](../notebooks/08_pm_external_signal_stability_quick.ipynb)
-- [08b_pm_external_signal_stability_folds_quick.ipynb](../notebooks/08b_pm_external_signal_stability_folds_quick.ipynb)
-- [09_action_unit_and_evaluation_quick.ipynb](../notebooks/09_action_unit_and_evaluation_quick.ipynb)
+- 03_target_contract_and_feature_map.ipynb
+- 04_alternative_target_exploration.ipynb
+- 05_core_target_stability.ipynb
+- 06_pm_feature_coverage_and_distributions.ipynb
+- 07_cross_venue_feature_audit.ipynb
+- 08_pm_external_signal_stability_quick.ipynb
+- 08b_pm_external_signal_stability_folds_quick.ipynb
+- 09_action_unit_and_evaluation_quick.ipynb
 
 ## Conclusion ejecutiva
 
@@ -288,7 +288,7 @@ necesitarlo.
 ## EDA 05 - Estabilidad en core completo
 
 Informe asociado:
-[EDA_05_TARGET_STABILITY.md](EDA_05_TARGET_STABILITY.md)
+EDA_05_TARGET_STABILITY.md
 
 La EDA 05 recalculo los targets alternativos sobre todo el baseline core,
 leyendo `4.999.680` filas de `polymarket_grid_rows` y reteniendo
@@ -323,7 +323,7 @@ Decision actual:
 ## EDA 06 - Cobertura y senal inicial de features PM
 
 Informe asociado:
-[EDA_06_PM_FEATURE_COVERAGE.md](EDA_06_PM_FEATURE_COVERAGE.md)
+EDA_06_PM_FEATURE_COVERAGE.md
 
 La EDA 06 estudio `2.457.308` filas del soporte PM con `mid` y `spread`
 validos. Las columnas PM basicas tienen cobertura completa en el soporte:
@@ -361,7 +361,7 @@ Decision actual de shortlist PM:
 ## EDA 07 - Cross-venue externo y lead-lag inicial
 
 Informe asociado:
-[EDA_07_CROSS_VENUE_AUDIT.md](EDA_07_CROSS_VENUE_AUDIT.md)
+EDA_07_CROSS_VENUE_AUDIT.md
 
 La EDA 07 leyo `2.486.400` filas core de `cross_venue_features` y reconstruyo
 un target H16 en `2.355.052` filas. La tabla cross es util, pero cara de
@@ -398,7 +398,7 @@ entrenar.
 ## EDA 08 quick - Interaccion PM + externo
 
 Informe asociado:
-[EDA_08_PM_EXTERNAL_SIGNAL_STABILITY_QUICK.md](EDA_08_PM_EXTERNAL_SIGNAL_STABILITY_QUICK.md)
+EDA_08_PM_EXTERNAL_SIGNAL_STABILITY_QUICK.md
 
 Esta EDA redujo el tamano de iteracion: muestra determinista por `id`, `99.040`
 filas leidas y `93.496` filas con soporte H16 exacto.
@@ -420,7 +420,7 @@ scan ancho.
 ## EDA 08b quick - Balanceo y coste visible
 
 Informe asociado:
-[EDA_08B_PM_EXTERNAL_BALANCED_COST_QUICK.md](EDA_08B_PM_EXTERNAL_BALANCED_COST_QUICK.md)
+EDA_08B_PM_EXTERNAL_BALANCED_COST_QUICK.md
 
 La EDA 08b balanceo la muestra por `terminal_split + temporality`:
 
@@ -445,7 +445,7 @@ market-frame para evitar doble conteo de tokens complementarios.
 ## EDA 09 quick - Unidad de accion y evaluacion
 
 Informe asociado:
-[EDA_09_ACTION_UNIT_EVALUATION_QUICK.md](EDA_09_ACTION_UNIT_EVALUATION_QUICK.md)
+EDA_09_ACTION_UNIT_EVALUATION_QUICK.md
 
 La EDA 09 confirmo que los pares complementarios de la muestra son completos:
 
@@ -479,7 +479,7 @@ Siguiente paso: contrato del baseline v0.
 ## Contrato baseline v0
 
 Documento asociado:
-[BASELINE_CONTRACT_V0.md](BASELINE_CONTRACT_V0.md)
+BASELINE_CONTRACT_V0.md
 
 Decision cerrada:
 

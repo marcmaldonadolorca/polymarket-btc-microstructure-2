@@ -224,4 +224,4 @@ Si el modelo consciente de `L=2s` no mejora el test terminal, el proyecto debe
 volver a exploracion de timing/orderbook antes de cualquier bot.
 
 Estrategia ampliada:
-[ESTRATEGIA_LATENCIA_Y_SIGUIENTE_FASE.md](ESTRATEGIA_LATENCIA_Y_SIGUIENTE_FASE.md)
+ESTRATEGIA_LATENCIA_Y_SIGUIENTE_FASE.md

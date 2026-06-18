@@ -201,7 +201,7 @@ L=2s sigue siendo una sensibilidad offline, no una latencia real demostrada.
 ## Extension v0.5
 
 Informe asociado:
-[LATENCY_V05_POLYMARKET_SAFE_PROBE.md](LATENCY_V05_POLYMARKET_SAFE_PROBE.md)
+LATENCY_V05_POLYMARKET_SAFE_PROBE.md
 
 Se anadio una prueba segura especifica de Polymarket:
 

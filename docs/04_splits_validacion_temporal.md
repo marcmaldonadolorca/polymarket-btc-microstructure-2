@@ -292,8 +292,8 @@ que depender de un unico corte cronologico.
 ## Relacion con las otras guias
 
 - Las features y sus ventanas estan en
-  [GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md](GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md).
+  GUIA_01_FEATURES_Y_VARIABLES_SINTETICAS.md.
 - La revision de los analisis ejecutados y la estrategia actual estan en
-  [SEGUIMIENTO_Y_ESTRATEGIA_ACTUAL.md](SEGUIMIENTO_Y_ESTRATEGIA_ACTUAL.md).
+  SEGUIMIENTO_Y_ESTRATEGIA_ACTUAL.md.
 - Los targets e implicaciones de costes estan en
-  [GUIA_04_LABELS_TARGETS_Y_COSTES.md](GUIA_04_LABELS_TARGETS_Y_COSTES.md).
+  GUIA_04_LABELS_TARGETS_Y_COSTES.md.
