@@ -103,14 +103,6 @@ Documentos clave para entender el pipeline, en orden:
 `docs/07_stress_de_latencia.md` -> `docs/14_especialista_prestart_h60.md` ->
 `docs/16_validacion_fresh.md` -> `docs/18_paper_shadow.md`.
 
-## Consideraciones éticas
-
-El sistema toma decisiones económicas automatizadas y es sensible al
-sobreajuste con pocos datos. Estos riesgos se analizan en el capítulo de ética
-de la memoria (basado en el trabajo de la asignatura de Ética sobre este mismo
-sistema). El proyecto se detiene deliberadamente en "paper shadow" y no opera
-con capital real.
-
 ## Estado y trabajo futuro
 
 Investigación **pausada** a fecha de entrega. Líneas abiertas: ampliar el
