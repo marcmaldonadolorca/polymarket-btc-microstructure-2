@@ -159,10 +159,21 @@ latencia, no por su acierto.
 \subsection{Definición del objetivo}
 
 Para cada instante $t$ se define el retorno futuro del precio medio a un horizonte $H$,
-$\Delta_H = (m_{t+H} - m_t)/m_t$, donde $m_t$ es el precio medio del contrato. La etiqueta
-direccional se obtiene con un umbral $\theta$ que absorbe el \emph{spread}, las comisiones
-y el ruido: \textsc{up} si $\Delta_H > \theta$, \textsc{down} si $\Delta_H < -\theta$ y
-\textsc{flat} en otro caso. Las características son causales (solo usan información hasta
+\begin{equation}
+\Delta_H(t) = \frac{m_{t+H} - m_t}{m_t},
+\end{equation}
+donde $m_t$ es el precio medio del contrato. La etiqueta direccional se obtiene con un
+umbral $\theta$ que absorbe el \emph{spread}, las comisiones y el ruido:
+\begin{equation}
+y_t = \begin{cases}
+\textsc{up} & \text{si } \Delta_H(t) > \theta,\\[2pt]
+\textsc{down} & \text{si } \Delta_H(t) < -\theta,\\[2pt]
+\textsc{flat} & \text{en otro caso.}
+\end{cases}
+\end{equation}
+Esta etiqueta ternaria es útil para mirar el arco experimental en su conjunto; el
+especialista final, en cambio, usa los dos objetivos económicos que se definen más abajo.
+Las características son causales (solo usan información hasta
 $t$) y las etiquetas se calculan \emph{a posteriori} de forma trazable, de modo que no
 entra información del futuro por las entradas del modelo. Todos los resultados económicos se
 expresan en ticks netos, que es la unidad natural del libro; no se traducen a dinero porque
@@ -224,7 +235,36 @@ en los datos de dos segundos (la malla de captura). El coste de ejecución no se
 número plano de ticks, sino como una fracción del coste visible de entrada de cada
 operación: la mitad de ese coste como referencia, un cuarto como contraste optimista y el
 coste completo como prueba de estrés. Modelar el coste relativo al libro de cada instante es
-más fiel que asumir un coste fijo e igual para todas las operaciones.
+más fiel que asumir un coste fijo e igual para todas las operaciones. Formalmente, el neto
+ejecutado a horizonte $H$ con un factor de coste $c \in \{0,\ 0{,}25,\ 0{,}5,\ 1\}$ es
+\begin{equation}
+\text{net}_c(t) = \big(\Delta^{\text{ticks}}_H(t) - b\big) - c \cdot \kappa_t,
+\label{eq:coste}
+\end{equation}
+donde $\Delta^{\text{ticks}}_H(t)$ es el \emph{markout} en ticks desde la entrada (a dos
+segundos del instante de señal) hasta el horizonte, $b$ es un \emph{buffer} fijo y $\kappa_t$
+es el coste visible de entrada de esa operación. Nótese que, por construcción, un factor de
+coste mayor produce un neto menor sobre la misma operación; por eso el resultado al coste de
+referencia ($c=0{,}5$) es siempre inferior al optimista ($c=0{,}25$) y superior al de estrés
+($c=1$).
+
+\subsection{Métricas de evaluación}
+
+La elección de métricas es deliberada y responde a las características del problema. Para la
+fase de clasificación no se reporta la precisión bruta (\emph{accuracy}), porque el dominio
+de la clase \textsc{flat} la vuelve engañosa; en su lugar se usan la \textbf{precisión
+equilibrada} (\emph{balanced accuracy}) y la \textbf{F1 macro}, que promedian por clase y no
+premian al modelo que siempre predice quietud. Para medir la capacidad de \emph{ordenar} las
+oportunidades se emplea el \textbf{AUC} (área bajo la curva ROC), independiente del umbral.
+
+Ahora bien, la métrica que decide es económica, no de clasificación: el \textbf{neto medio
+por operación} bajo el modelo de costes de la ecuación~\eqref{eq:coste}. A su alrededor se
+reportan siempre cuatro elementos de soporte e incertidumbre: (i) el \textbf{número de
+operaciones y de días}, porque un neto sin soporte no es interpretable; (ii) un
+\textbf{intervalo de confianza \emph{bootstrap}} (5\,000 remuestreos, semilla fija); (iii) la
+\textbf{probabilidad de neto positivo} estimada sobre esa misma distribución; y (iv) el
+\textbf{drawdown máximo} y el número de \textbf{días positivos}, como medidas de estabilidad.
+Esta batería evita confundir una señal estadística con una estrategia viable.
 
 \subsection{La escalera de modelos}
 
@@ -257,9 +297,20 @@ pasos y un tensor de los diez primeros niveles, y se evalúan una red recurrente
 oculta de dimensión 56), un codificador convolucional del libro (\emph{BookEncoder}, dos
 capas Conv1D con \emph{pooling} medio y máximo, inspirado en
 DeepLOB~\cite{zhang2019deeplob,tsantekidis2017}), una fusión de ambos y una red convolucional
-temporal (TCN) para el régimen de volatilidad. Estas arquitecturas aprenden representación,
-pero no producen una política estable con un horizonte de entrenamiento de unas dos semanas
-(unos 5\,800 ejemplos): el aprendizaje profundo se aparca a la espera de más datos.
+temporal (TCN) para el régimen de volatilidad. El \emph{BookEncoder} resume cada fotografía
+del libro con dos convoluciones unidimensionales sobre la dimensión de niveles y un
+\emph{pooling} dual (medio y máximo):
+\begin{equation}
+\mathbf{h} = \big[\operatorname{mean}_\tau\, \phi(\mathbf{B}_\tau)\ \|\ \operatorname{max}_\tau\, \phi(\mathbf{B}_\tau)\big],
+\quad
+\phi = \text{ReLU}\!\circ\!\text{Conv1d}\!\circ\!\text{Dropout}\!\circ\!\text{ReLU}\!\circ\!\text{Conv1d},
+\end{equation}
+donde $\mathbf{B}_\tau$ es el libro en el paso $\tau$ de la secuencia y $\|$ denota
+concatenación. El \emph{pooling} máximo capta los picos de profundidad, a menudo más
+informativos que la media en mercados poco líquidos. Estas arquitecturas aprenden
+representación, pero no producen una política estable con un horizonte de entrenamiento de
+unas dos semanas (unos 5\,800 ejemplos): el aprendizaje profundo se aparca a la espera de
+más datos.
 
 Durante la auditoría se detectó y corrigió un error de interpretación en el \emph{score} de
 selección adversa (su orientación correcta es $1 - P(\text{adverso})$), lo que ilustra que
@@ -288,7 +339,25 @@ El candidato final es un especialista para la ventana \emph{prestart}: un modelo
 \emph{gradient boosting} sobre histogramas (HistGradientBoosting) con las dos cabezas
 descritas, entrenado sobre 36 características sin variables de reloj (para evitar atajos
 temporales triviales). La señal se restringe a la ventana de $-60$ a $-45$ segundos respecto
-a la apertura, con libro saludable y coste visible acotado. Ambas cabezas comparten una
+a la apertura, con libro saludable y coste visible acotado (Figura~\ref{fig:prestart}).
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\small, >=Latex]
+  \draw[-{Latex}] (-0.5,0) -- (10.8,0) node[right, font=\scriptsize] {tiempo};
+  \fill[orange!25] (1,-0.18) rectangle (3.5,0.18);
+  \node[font=\scriptsize, align=center] at (2.25,0.6) {ventana \emph{prestart}\\$-60$ a $-45$\,s};
+  \draw[dashed] (8.5,-0.7) -- (8.5,0.9);
+  \node[font=\scriptsize, align=center] at (8.5,1.1) {apertura\\del mercado};
+  \foreach \x/\lab in {1/{$-60$\,s}, 3.5/{$-45$\,s}, 8.5/{$0$}}
+    \draw (\x,0.12) -- (\x,-0.12) node[below, font=\scriptsize] {\lab};
+  \node[font=\scriptsize, align=center, gray] at (5.9,-0.6) {(resto del \emph{prestart}: no se opera)};
+\end{tikzpicture}
+\caption{La ventana \emph{prestart} del especialista: solo se opera entre $-60$ y $-45$
+segundos respecto a la apertura del mercado, donde el análisis exploratorio detectó una
+densidad atípica de actividad del libro.}
+\label{fig:prestart}
+\end{figure} Ambas cabezas comparten una
 configuración de regularización agresiva (tasa de aprendizaje 0,045, hasta 220 iteraciones
 con parada anticipada, máximo de 15 hojas por árbol, mínimo de 120 muestras por hoja y
 regularización L2 de 0,10), necesaria porque el bloque de entrenamiento del especialista

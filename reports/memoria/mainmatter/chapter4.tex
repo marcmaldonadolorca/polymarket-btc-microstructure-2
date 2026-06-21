@@ -83,6 +83,36 @@ de muestra explica por qué el filtro de volatilidad resulta determinante.}
 \label{fig:regimen}
 \end{figure}
 
+El porqué se ve con claridad al desglosar las operaciones \emph{fresh} por régimen
+(Tabla~\ref{tab:regimen} y Figura~\ref{fig:regimenneto}). Las operaciones de baja volatilidad
+—las que el filtro habilita— son fuertemente positivas, mientras que las de alta volatilidad
+—las que el filtro descarta— son netamente negativas. El filtro no ``mejora'' el modelo: se
+limita a no operar donde el modelo, entrenado en baja volatilidad, no es de fiar.
+
+\begin{table}[h]
+\centering
+\caption{Neto medio en datos fuera de muestra por régimen de volatilidad (ticks).}
+\label{tab:regimen}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Régimen} & \textbf{$n$} & \textbf{@0,25} & \textbf{@0,5} & \textbf{@1,0} \\
+\midrule
+Baja volatilidad (habilitado por el filtro) & 319 & $+1{,}264$ & $+1{,}076$ & $+0{,}698$ \\
+Alta volatilidad (descartado por el filtro) & 435 & $+0{,}004$ & $-0{,}184$ & $-0{,}558$ \\
+\midrule
+Total sin filtro                            & 754 & $+0{,}537$ & $+0{,}349$ & $-0{,}027$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.56\textwidth]{figures/fig_regimen_neto.png}
+\caption{Neto medio por régimen en datos fuera de muestra. El filtro de volatilidad separa
+operaciones rentables (baja volatilidad) de operaciones perdedoras (alta volatilidad).}
+\label{fig:regimenneto}
+\end{figure}
+
 \subsection{Seguimiento \emph{paper-shadow}}
 
 La pieza de evaluación final es un registro \emph{paper-shadow}: contabilidad operación a
