@@ -1,0 +1,113 @@
+% --------------------------
+% Document class
+% --------------------------
+\documentclass[
+A4paper,                % paper size A4
+twoside,                % onesite or twoside printing
+openright,              % doublepage cleaning ends up right side
+chapterprefix=true,     % prefix for chapter marks
+12pt,                   % font size
+headings=normal,        % size of headings
+titlepage=on            % own page for each title page
+]{book}
+
+% **************************************************
+% THESIS details
+% **************************************************
+
+\newcommand{\University}{\protect{Universidad Polit\'ecnica de Madrid}}
+\newcommand{\UNIVERSITY}{\protect{UNIVERSIDAD POLIT\'ECNICA DE MADRID}}
+
+\input{thesisDetails}
+
+% **************************************************
+% Settings
+% **************************************************
+
+\input{settings}
+
+% **************************************************
+% Begin document
+% **************************************************
+\begin{document}
+
+% --------------------------
+% Cover and front matter
+% --------------------------
+\frontmatter
+\pagestyle{empty}				    % no header nor footer
+\input{frontmatter/1_cover}
+\newpage
+
+
+
+\pagenumbering{roman}			    % roman page numbering 
+\pagestyle{plain}				    % empty header, just page number in footer
+\input{frontmatter/3_teseo}
+\cleardoublepage
+
+\input{frontmatter/4_dedication}   % dedication (optional)
+\cleardoublepage
+
+\input{frontmatter/5_acknowledgement}  % acknowledgement (optional)
+\newpage
+
+\input{frontmatter/6_abstract}		% abstract (in English and Spanish)
+\newpage
+
+\selectlanguage{spanish}
+
+\setcounter{tocdepth}{3}		% define depth of toc
+\tableofcontents				% display table of contents
+
+
+\addcontentsline{toc}{section}{Lista de Figuras}
+\listoffigures
+
+
+\addcontentsline{toc}{section}{Lista de Tablas}
+\listoftables
+\newpage
+
+\input{frontmatter/7_acronyms}
+\cleardoublepage
+
+% --------------------------
+% Main matter
+% --------------------------
+\mainmatter
+\pagenumbering{arabic}			% arabic page numbering
+\setcounter{page}{1}			% set page counter
+\pagestyle{fancy} 	            % fancy header and footer
+\parskip=7pt                    % space after each paragraph
+\parindent=0pt                  % suppress indentation of paragraphs
+
+
+% Capítulos
+\include{mainmatter/chapter1}
+\include{mainmatter/chapter2}
+\include{mainmatter/chapter3}
+\include{mainmatter/chapter4}
+\include{mainmatter/chapter5}
+\include{mainmatter/chapter6}
+\include{mainmatter/chapter7}
+\include{mainmatter/chapter8}
+
+\cleardoublepage
+
+% --------------------------
+% Back matter
+% --------------------------
+\backmatter
+% Bibliografía manual (compatible con tectonic, sin biber). Ver nota en settings.tex.
+% \printbibliography[title=Referencias, heading=bibintoc]
+\renewcommand{\bibname}{Referencias}
+\input{mainmatter/references}
+
+\appendix
+\input{mainmatter/anexos}
+
+% **************************************************
+% End of document
+% **************************************************
+\end{document}

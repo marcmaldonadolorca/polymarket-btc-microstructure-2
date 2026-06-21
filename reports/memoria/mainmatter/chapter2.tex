@@ -1,0 +1,94 @@
+% called by main.tex
+%
+\chapter{Estado de la cuestión}
+\label{ch::estado}
+
+Este capítulo sitúa el trabajo en la literatura. Se organiza en cinco áreas que confluyen
+en el problema —mercados de predicción, aprendizaje profundo sobre libros de órdenes,
+microestructura y ejecución, validación temporal en finanzas, y cambio de
+distribución— y termina señalando el hueco concreto que este trabajo pretende cubrir.
+
+\section{Trabajos previos y estudios relevantes}
+
+\subsection{Mercados de predicción}
+
+Los mercados de predicción se han estudiado, sobre todo, como mecanismos de agregación de
+información dispersa. Wolfers y Zitzewitz~\cite{wolfers2004prediction} muestran que pueden
+producir previsiones notablemente precisas, si bien su interpretación depende del diseño
+del contrato, de la liquidez y de los incentivos de los participantes. La mayor parte de
+esta literatura analiza la calibración del precio frente a la resolución final del evento.
+El presente trabajo se sitúa un escalón por debajo, en el terreno de la microestructura:
+la dinámica intradía del precio del contrato a escala de segundos, donde aparecen
+\emph{spreads}, profundidad limitada y desajustes transitorios respecto a las referencias
+externas.
+
+\subsection{Aprendizaje profundo sobre libros de órdenes}
+
+La predicción del movimiento de precios a partir del libro de órdenes es un problema con
+una literatura ya madura. El trabajo de referencia es DeepLOB~\cite{zhang2019deeplob}, que
+combina convoluciones para capturar la estructura espacial del libro con capas recurrentes
+para la dependencia temporal, y se valida sobre el conjunto de referencia
+FI-2010~\cite{ntakaris2018}. En la misma línea, Tsantekidis et al.~\cite{tsantekidis2017}
+emplean redes convolucionales y recurrentes para detectar cambios de precio en el libro.
+Sirignano y Cont~\cite{sirignano2019universal} aportan evidencia de la existencia de
+características universales en la formación de precios que el aprendizaje profundo es capaz
+de capturar, y Jha et al.~\cite{jha2020digital} trasladan estas ideas al terreno de los
+criptoactivos. De esta literatura se toma una decisión de diseño importante: tratar el
+libro de órdenes como un objeto con estructura espacio-temporal, y no como una tabla
+plana. Ahora bien, casi todos estos trabajos se evalúan con métricas de clasificación y
+rara vez bajo un modelo de ejecución realista, que es justamente donde este trabajo pone
+el acento.
+
+\subsection{Microestructura, costes de ejecución y latencia}
+
+La distancia entre predecir bien y obtener beneficio es uno de los temas clásicos de la
+microestructura de mercado. Kearns y Nevmyvaka~\cite{kearns2013} revisan el papel del
+aprendizaje automático en microestructura y negociación de alta frecuencia, y subrayan que
+la ejecución, el coste y la latencia condicionan de forma decisiva la viabilidad de una
+señal. Este trabajo cuantifica ese fenómeno en el contexto concreto de Polymarket: se mide
+la latencia real del ciclo de orden y se demuestra que una señal direccional fuerte se
+vuelve no rentable bajo una latencia de entrada modesta.
+
+\subsection{Aprendizaje automático en finanzas y validación temporal}
+
+El aprendizaje automático aplicado a la predicción financiera es especialmente propenso a
+resultados ilusorios cuando la evaluación no respeta la estructura temporal de los datos.
+Gu, Kelly y Xiu~\cite{gu2020empirical} ofrecen un marco riguroso de comparación de modelos
+con validación fuera de muestra. López de Prado~\cite{lopezdeprado2018} documenta los
+mecanismos por los que se cuela información del futuro y por los que se sobreajustan los
+\emph{backtests}, y propone protocolos de validación que respetan la causalidad temporal.
+Bailey y López de Prado~\cite{bailey2014deflated} advierten de un riesgo adicional: si se
+prueban muchos modelos y se elige el mejor, las métricas de rendimiento salen infladas casi
+por construcción. Estas referencias motivan tres decisiones metodológicas de este trabajo:
+la partición estrictamente temporal, el protocolo fuera de pliegue (\emph{out-of-fold}) y
+la congelación del candidato antes de observar el conjunto de validación fuera de muestra.
+
+\subsection{Cambio de distribución y adaptación de dominio}
+
+Los mercados financieros no son estacionarios, por lo que la distribución de los datos
+cambia entre el periodo de entrenamiento y el de despliegue. Para amortiguar ese efecto
+existen técnicas de adaptación de dominio, como la alineación de correlaciones
+CORAL~\cite{sun2016coral}. En el Capítulo~\ref{ch::resultados} se mostrará un resultado
+contraintuitivo: con un horizonte de datos reducido, estas técnicas no superan a una
+estrategia mucho más simple, consistente en restringir la operativa al régimen en el que
+el modelo fue entrenado. Por último, en cuanto a arquitecturas profundas para series
+temporales multivariantes, trabajos como el \emph{Temporal Fusion
+Transformer}~\cite{lim2021tft} marcan una línea de evolución natural para cuando se
+disponga de muchos más datos.
+
+\section{Limitaciones en la literatura}
+
+Del repaso anterior se desprenden tres limitaciones recurrentes que enmarcan la aportación
+de este trabajo. En primer lugar, la evaluación predominante es de \emph{clasificación}
+(precisión, AUC), y rara vez se traduce a un resultado económico bajo un modelo de
+ejecución realista; como se verá, esa traducción cambia las conclusiones por completo. En
+segundo lugar, gran parte de los resultados positivos se obtienen sin una latencia de
+entrada explícita, cuando la latencia es precisamente lo que destruye muchas señales de
+corto plazo. En tercer lugar, los entornos de criptoactivos jóvenes ofrecen pocos datos,
+lo que agrava el riesgo de sobreajuste y de resultados ilusorios si la validación no es
+estrictamente temporal.
+
+El hueco que cubre este trabajo es, por tanto, metodológico: evaluar la predicción de
+corto plazo \emph{bajo coste y latencia medida}, con validación estrictamente temporal y
+congelación previa del candidato, y reportar cada resultado en ticks netos acompañado de
+su soporte y su incertidumbre.

@@ -1,0 +1,120 @@
+% called by main.tex
+%
+\chapter{Resultados y análisis}
+\label{ch::resultados}
+
+Este capítulo presenta los resultados del candidato congelado sobre el conjunto fuera de
+muestra y los compara con los demás enfoques evaluados. Todos los netos se reportan en ticks
+y van acompañados de su soporte (número de operaciones y días) y de su incertidumbre.
+
+\section{Resultados obtenidos}
+
+\subsection{Validación fuera de muestra}
+
+Con el candidato ya congelado y el filtro de volatilidad activado, se evaluó sobre los cinco
+días del conjunto fuera de muestra (6--10 de junio de 2026). El resultado son 318 operaciones
+seleccionadas, con un neto medio positivo en los tres niveles de coste considerados
+(Tabla~\ref{tab:fresh} y Figura~\ref{fig:coste}). El intervalo de confianza es \emph{bootstrap}
+con 5\,000 remuestreos y semilla fija; la probabilidad de neto positivo se estima sobre la
+misma distribución de remuestreo.
+
+\begin{table}[h]
+\centering
+\caption{Validación fuera de muestra del candidato congelado (ticks netos por operación, $n=318$).}
+\label{tab:fresh}
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Operaciones ($n$)                       & 318 \\
+Días de soporte                         & 5 (5/5 positivos) \\
+Neto medio (coste 0,25, optimista)      & $+1{,}255$ ticks \\
+Neto medio (coste 0,5, referencia)      & $+1{,}069$ ticks \\
+Neto medio (coste 1,0, estrés)          & $+0{,}697$ ticks \\
+Intervalo de confianza 90\,\% (coste 0,5) & $[+0{,}472,\ +1{,}654]$ \\
+Probabilidad de neto positivo (\emph{bootstrap}) & 99,8\,\% \\
+Drawdown máximo                         & 88,1 ticks \\
+Neto medio sin filtro de volatilidad (coste 0,5) & $+0{,}349$ ticks \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/fig_coste.png}
+\caption{Sensibilidad del neto al nivel de coste. El resultado es positivo incluso bajo el
+coste de estrés (coste completo de entrada).}
+\label{fig:coste}
+\end{figure}
+
+El soporte es de cinco días: es reducido y se reporta de forma explícita junto a cada cifra.
+Lo que sí es robusto dentro de ese soporte es la \emph{consistencia diaria}: los cinco días
+son positivos (Figura~\ref{fig:netodiario}). La evolución del neto acumulado y su drawdown se
+muestran en la Figura~\ref{fig:drawdown}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.62\textwidth]{figures/fig_neto_diario.png}
+\caption{Neto medio por día en el conjunto fuera de muestra. Los cinco días son positivos.}
+\label{fig:netodiario}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.62\textwidth]{figures/fig_drawdown.png}
+\caption{Neto acumulado (arriba) y drawdown (abajo) sobre las 318 operaciones. El drawdown
+máximo es de 88,1 ticks.}
+\label{fig:drawdown}
+\end{figure}
+
+\subsection{El papel del filtro de volatilidad}
+
+El filtro de volatilidad aporta la mayor parte de la ventaja, y no por casualidad, sino
+porque el régimen del conjunto fuera de muestra difiere del de entrenamiento
+(Figura~\ref{fig:regimen}). Sin el filtro, el neto medio (coste 0,5) desciende a $+0{,}349$
+ticks; con él, asciende a $+1{,}069$. La contribución del filtro es, por tanto, de unos
+$+0{,}72$ ticks por operación.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.6\textwidth]{figures/fig_regimen.png}
+\caption{Fracción de sesiones de alta volatilidad por periodo. El salto en el conjunto fuera
+de muestra explica por qué el filtro de volatilidad resulta determinante.}
+\label{fig:regimen}
+\end{figure}
+
+\subsection{Seguimiento \emph{paper-shadow}}
+
+La pieza de evaluación final es un registro \emph{paper-shadow}: contabilidad operación a
+operación, resumen diario y reglas de promoción cuantitativas. Las reglas son deliberadamente
+conservadoras y exigen soporte temporal, no solo neto positivo: la promoción a candidato de
+seguimiento requiere un neto superior a 0,5 ticks, al menos 200 operaciones y al menos 8 días.
+Con cinco días, el candidato permanece en estado \emph{prometedor pero con datos
+insuficientes}, por falta de soporte temporal y no por ausencia de señal. Forzar la promoción
+en este punto sería metodológicamente incorrecto.
+
+\section{Comparativa con otros enfoques y baseline}
+
+\subsection{Especialista tabular frente a aprendizaje profundo}
+
+La comparación entre el especialista tabular congelado y las arquitecturas profundas resume
+el arco del trabajo. Las redes recurrentes y convolucionales sobre el libro aprenden
+representación —algunas políticas \emph{proxy} resultan positivas dentro de muestra—, pero
+esa ventaja no sobrevive cuando se exige selección causal día a día y estabilidad en todo el
+bloque de test. Con un horizonte de datos de unas dos semanas, la capacidad necesaria para
+generalizar temporalmente excede lo que las redes pueden estimar de forma fiable. El modelo
+tabular con regularización agresiva, en cambio, sí produce una política que sobrevive a la
+validación fuera de muestra.
+
+\subsection{Experimentos de adaptación al régimen}
+
+Ante el cambio de régimen, la respuesta obvia era adaptar el modelo. Se intentó por varias
+vías: reentrenamiento incremental con ventana móvil, alineación de correlaciones
+CORAL~\cite{sun2016coral}, un filtro conformal, un \emph{ensemble} por \emph{bootstrap}, un
+filtro de volatilidad adaptativo, características normalizadas por volatilidad y
+\emph{distillation} de una red convolucional temporal. Ninguna superó de forma robusta al
+modelo congelado con su filtro simple. Este resultado negativo es informativo: con tan pocos
+días, un modelo congelado más un filtro sencillo le gana a la adaptación de dominio
+sofisticada, que necesita más datos de los disponibles para estimarse de forma fiable. Es,
+además, coherente con la observación de la línea base: la complejidad solo se justifica si
+mejora el resultado bajo el mismo protocolo, y aquí no lo hace.

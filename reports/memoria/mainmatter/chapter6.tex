@@ -1,0 +1,34 @@
+% called by main.tex
+%
+\chapter{Aspectos éticos y limitaciones}
+\label{ch::etica}
+
+\section{Consideraciones éticas}
+
+El sistema toma decisiones económicas de forma automatizada y es especialmente sensible al
+sobreajuste cuando el horizonte de datos es reducido. Por ello el trabajo se detiene
+deliberadamente en la fase de \emph{paper-shadow} y no opera con capital real. Se adopta un
+marco de confidencialidad, integridad y disponibilidad, y se trata la integridad de los
+datos como algo tan crítico como el propio modelo: una referencia externa retrasada o errónea
+puede inducir una señal espuria y, con ella, una pérdida. En consecuencia, el sistema se
+entrena únicamente con sesiones aceptadas, separa los datos crudos de las características y las
+etiquetas, mantiene trazabilidad de los artefactos y define umbrales para inhibir la operativa
+ante datos obsoletos. El trabajo no emplea datos personales: utiliza exclusivamente datos
+públicos de mercado.
+
+\section{Limitaciones}
+
+La limitación principal es el soporte temporal del conjunto fuera de muestra: cinco días.
+Aunque el intervalo de confianza es estrecho y los cinco días son positivos, cinco días no
+constituyen una validación definitiva, y así se reporta. El resultado es además específico de
+la ventana \emph{prestart} y del régimen capturado; un cambio de régimen suficientemente
+grande podría invalidar el filtro de volatilidad, como ilustra el propio desplazamiento
+observado entre el entrenamiento y el conjunto fuera de muestra. Por último, la validación es
+\emph{offline}, bajo un modelo de ejecución conservador pero simplificado; una validación con
+ejecución simulada de mayor fidelidad —que incorpore rellenos parciales y dinámica de
+cola— queda como trabajo pendiente.
+
+Se observa, además, un patrón en forma de U entre la volatilidad y el beneficio dentro del
+intervalo habilitado por el filtro, en el que la volatilidad muy baja concentra la mayor
+parte del beneficio. Dado que descansa sobre los mismos cinco días, se deja como hipótesis a
+comprobar y no como resultado.

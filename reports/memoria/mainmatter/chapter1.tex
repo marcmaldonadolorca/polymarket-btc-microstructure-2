@@ -1,0 +1,168 @@
+% called by main.tex
+%
+\chapter{Introducción}
+\label{ch::introduccion}
+
+Este Trabajo Fin de Máster estudia un problema de predicción financiera de muy corto
+plazo en un entorno poco habitual: los mercados de predicción sobre el precio de Bitcoin
+de la plataforma Polymarket. El objetivo no es un sistema de trading en producción, sino
+una \emph{metodología} rigurosa para responder, con honestidad estadística, a una
+pregunta concreta: ¿contiene el libro de órdenes de estos mercados señales que permitan
+anticipar el movimiento del precio en los próximos segundos y que, además, sobrevivan a
+los costes y a la latencia reales de operar?
+
+Como el lector puede no estar familiarizado con el mundo de las criptomonedas ni con la
+microestructura de mercado, este capítulo introduce todos los conceptos desde cero antes
+de plantear el problema y los objetivos.
+
+\section{Introducción y definición del problema}
+
+\subsection{Qué es un mercado de predicción}
+
+Un \emph{mercado de predicción} es un mercado en el que se compran y venden contratos
+cuyo valor depende del resultado de un acontecimiento futuro. El caso más sencillo es el
+\emph{contrato binario}: un contrato que pagará una unidad monetaria si el acontecimiento
+ocurre y cero si no ocurre. Por construcción, su precio se mueve entre 0 y 1, y puede
+leerse directamente como la \emph{probabilidad implícita} que el mercado asigna al
+suceso. Por ejemplo, un contrato ``el precio de Bitcoin estará por encima de un umbral a
+una hora determinada'' que cotiza a 0,60 indica que el mercado estima una probabilidad
+cercana al 60\,\% de que eso ocurra. Cuando el acontecimiento se resuelve, el contrato
+vale 1 o 0 y las posiciones se liquidan. La literatura clásica ha mostrado que estos
+mercados agregan información dispersa y producen previsiones razonablemente
+calibradas~\cite{wolfers2004prediction}.
+
+\subsection{Qué es Polymarket}
+
+Polymarket es una plataforma de mercados de predicción descentralizada. A diferencia de
+una casa de apuestas, donde el operador fija las cuotas, en Polymarket son los propios
+participantes quienes ponen precios mediante un \emph{libro de órdenes}: el emparejamiento
+de compras y ventas ocurre fuera de la cadena de bloques (de forma rápida) y la
+liquidación final del dinero se registra en cadena (sobre una \emph{blockchain})
+\cite{polymarket_trading}. En los mercados sobre el precio de Bitcoin, cada contrato
+binario tiene un precio que, como se ha dicho, vive entre 0 y 1 y se interpreta como una
+probabilidad~\cite{polymarket_prices}. Esto convierte cada mercado en un pequeño
+\emph{mercado electrónico} (\emph{exchange}) con su propia dinámica de oferta y demanda.
+
+\subsection{El libro de órdenes y el vocabulario de la microestructura}
+
+El \emph{libro de órdenes} (en inglés \emph{limit order book}, LOB) es la lista, ordenada
+por precio, de todas las órdenes de compra y de venta que están a la espera de ejecutarse.
+Sus elementos esenciales son:
+
+\begin{itemize}
+  \item \textbf{Bid}: el precio más alto al que alguien está dispuesto a comprar.
+  \item \textbf{Ask}: el precio más bajo al que alguien está dispuesto a vender. Siempre
+  es mayor o igual que el \emph{bid}.
+  \item \textbf{Spread}: la diferencia entre el \emph{ask} y el \emph{bid}. Es el primer
+  coste de operar: quien compra al \emph{ask} y vende al \emph{bid} pierde el \emph{spread}.
+  \item \textbf{Profundidad}: el volumen disponible en cada nivel de precio. A más
+  profundidad, más se puede operar sin mover el precio.
+  \item \textbf{Precio medio} (\emph{mid}): el punto medio entre \emph{bid} y \emph{ask};
+  una referencia ``limpia'' del precio sin el ruido del \emph{spread}.
+  \item \textbf{Tick}: la variación mínima de precio que admite el mercado. Es la unidad
+  natural en la que mediremos todos los resultados de este trabajo.
+\end{itemize}
+
+La \emph{microestructura de mercado} es la rama que estudia cómo se forman los precios a
+partir de estos mecanismos —órdenes, \emph{spread}, profundidad y flujo de
+operaciones— a escalas de tiempo muy finas. La Figura~\ref{fig:mercado} resume el entorno:
+el precio del contrato se forma en su propio libro de órdenes, pero está acoplado a
+referencias externas del mercado de Bitcoin (mercado al contado, futuros perpetuos y un
+oráculo de precios), porque al fin y al cabo el contrato habla del precio de Bitcoin.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  node distance=8mm,
+  box/.style={draw, rounded corners, align=center, minimum height=9mm, inner sep=4pt, font=\small},
+  ext/.style={box, fill=blue!6},
+  core/.style={box, fill=orange!12, thick},
+  tgt/.style={box, fill=green!10},
+  >=latex
+]
+\node[ext] (spot) {Mercado al contado\\(spot BTC)};
+\node[ext, below=of spot] (perp) {Futuros perpetuos\\(perp BTC)};
+\node[ext, below=of perp] (oracle) {Oráculo de precios};
+\node[core, right=22mm of perp] (lob) {Libro de órdenes\\del contrato\\(\emph{bid}, \emph{ask}, \emph{spread})};
+\node[tgt, right=22mm of lob] (mid) {Precio del contrato\\$m_t \in [0,1]$};
+\node[box, below=14mm of mid, fill=gray!8] (pred) {Pregunta: ¿hacia dónde\\se mueve $m_t$ en los\\próximos segundos?};
+\draw[->] (spot) -- (lob);
+\draw[->] (perp) -- (lob);
+\draw[->] (oracle) -- (lob);
+\draw[->] (lob) -- (mid);
+\draw[->] (mid) -- (pred);
+\end{tikzpicture}
+\caption{El entorno del problema. El precio del contrato binario se forma en su libro de
+órdenes y está acoplado a referencias externas del mercado de Bitcoin. El objetivo es
+anticipar su movimiento de muy corto plazo.}
+\label{fig:mercado}
+\end{figure}
+
+\subsection{Definición del problema}
+
+El precio del contrato no es el precio de Bitcoin: es una función no lineal y dependiente
+del tiempo de la probabilidad de que el suceso se resuelva afirmativamente. Sin embargo,
+está acoplado a las referencias externas observables que se acaban de citar. Un modelo
+útil debe, por tanto, aprender dos cosas a la vez: la dinámica interna del libro de
+órdenes y la semántica del contrato respecto a Bitcoin.
+
+El problema que se aborda es de microestructura y de muy corto plazo: dado el estado del
+mercado en un instante $t$ (libro de órdenes y referencias externas), predecir el
+movimiento del precio medio del contrato en una ventana de pocas decenas de segundos. A
+diferencia de la mayor parte de la literatura sobre mercados de predicción, que estudia
+cómo se calibra el precio frente a la resolución final del evento, aquí el interés está en
+los movimientos locales del precio, a escala de segundos.
+
+Conviene fijar desde el principio un matiz que vertebra todo el trabajo: una buena
+capacidad de \emph{predecir la dirección} no implica una estrategia rentable. Una métrica
+de clasificación puede ser muy alta y, aun así, el sistema no ser explotable si opera con
+retraso, si aprende artefactos del propio conjunto de datos o si ignora el coste real de
+cruzar una orden. Por eso el problema no se evalúa por el acierto, sino por el resultado
+económico neto, una vez descontados costes y latencia realistas.
+
+\section{Motivación}
+
+La motivación de este trabajo es doble. Desde el punto de vista aplicado, los mercados de
+predicción de criptoactivos son un entorno joven, con menos competencia algorítmica que
+los mercados financieros tradicionales, y con datos públicos accesibles; resulta natural
+preguntarse si contienen señales explotables. Desde el punto de vista metodológico —que es
+el que da peso a una memoria de máster— el entorno es un excelente banco de pruebas para
+una cuestión central en el aprendizaje automático aplicado a finanzas: la distancia entre
+\emph{predecir bien} y \emph{ganar dinero}.
+
+Esa distancia es el hilo conductor. Como se mostrará, un clasificador direccional sencillo
+alcanza una precisión cercana al 90\,\% y, pese a ello, deja de ser rentable en cuanto se
+introduce una latencia de entrada realista de dos segundos. El coste y la ejecución, y no
+el acierto, determinan el resultado. Asumir lo contrario es uno de los errores más comunes
+y costosos en este campo, y documentarlo con evidencia cuantitativa es, en sí mismo, una
+aportación.
+
+\section{Objetivos}
+
+El objetivo general es \textbf{construir y validar, con un protocolo honesto, una
+metodología completa para evaluar si el aprendizaje automático y profundo pueden anticipar
+el movimiento de corto plazo del precio de los contratos de Bitcoin de Polymarket bajo
+costes y latencia realistas}. De él se derivan los siguientes objetivos específicos:
+
+\begin{enumerate}[noitemsep]
+  \item Diseñar un sistema de captura de datos multifuente, con control de calidad por
+  sesión, que produzca un corpus alineado temporalmente y libre de fugas.
+  \item Definir un protocolo de evaluación que combine validación estrictamente temporal,
+  un modelo explícito de costes y una latencia medida empíricamente.
+  \item Cuantificar el impacto de la latencia sobre una señal direccional fuerte, para
+  delimitar dónde se rompe la cadena entre predicción y ejecución.
+  \item Evaluar una progresión de modelos, de menor a mayor complejidad (líneas base
+  tabulares, modelos sensibles a la latencia y arquitecturas profundas sobre el libro de
+  órdenes), exigiendo que cada incremento de complejidad se justifique con evidencia.
+  \item Determinar si existe un candidato que sobreviva a una validación fuera de muestra
+  bajo coste, y delimitar con rigor sus límites y su incertidumbre.
+\end{enumerate}
+
+\paragraph{Estructura de la memoria.} El Capítulo~\ref{ch::estado} revisa el estado de la
+cuestión. El Capítulo~\ref{ch::metodos} describe los datos, las líneas base y la
+metodología de modelado. El Capítulo~\ref{ch::resultados} presenta y analiza los
+resultados. El Capítulo~\ref{ch::despliegue} discute la estrategia de despliegue. El
+Capítulo~\ref{ch::etica} aborda los aspectos éticos y las limitaciones. El
+Capítulo~\ref{ch::reproducibilidad} detalla la reproducibilidad, y el
+Capítulo~\ref{ch::conclusiones} recoge las conclusiones. Los anexos incluyen un glosario
+de términos para el lector no familiarizado con las criptomonedas.

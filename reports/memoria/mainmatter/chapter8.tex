@@ -1,0 +1,30 @@
+% called by main.tex
+%
+\chapter{Conclusiones}
+\label{ch::conclusiones}
+
+Este trabajo ha presentado una metodología completa de captura de datos, validación temporal
+y control de costes para la predicción de corto plazo en los mercados de Bitcoin de
+Polymarket. La conclusión que atraviesa todo el trabajo es que los clasificadores
+direccionales, pese a una precisión cercana al 90\,\%, dejan de ser rentables bajo una
+latencia de entrada realista: el coste y la ejecución, y no el acierto, determinan el
+resultado. Esta observación, cuantificada en el Capítulo~\ref{ch::metodos}, reorienta el
+problema de la clasificación hacia la ejecución.
+
+Sobre esa base, el aprendizaje profundo aplicado a secuencias y al libro de órdenes aporta
+capacidad de representación, pero no una política rentable y estable con un horizonte de datos
+de unas dos semanas. Un especialista tabular congelado, combinado con un filtro de
+volatilidad, sí sobrevive a una validación fuera de muestra de cinco días ($+1{,}069$ ticks
+netos por operación al coste de referencia, cinco de cinco días positivos) y queda en
+seguimiento \emph{paper-shadow} con reglas de promoción cuantitativas. No se afirma
+rentabilidad real: la aportación del trabajo es la metodología, la evidencia obtenida bajo un
+protocolo honesto y la delimitación explícita de sus límites.
+
+\paragraph{Trabajo futuro.} Las líneas abiertas son tres. Primera, ampliar el soporte temporal
+del conjunto fuera de muestra: la mayor parte de las limitaciones se reduce a la escasez de
+días. Segunda, validar el patrón en forma de U entre volatilidad y beneficio, que de momento
+es solo una hipótesis. Tercera, reevaluar las arquitecturas profundas —por ejemplo,
+transformadores temporales como el \emph{Temporal Fusion Transformer}~\cite{lim2021tft}— con un
+horizonte de datos sustancialmente mayor, y solo si consiguen superar al especialista tabular
+bajo el mismo protocolo de costes y validación. La regla que ha guiado todo el trabajo sigue
+en pie: la complejidad debe ganarse su sitio con evidencia.

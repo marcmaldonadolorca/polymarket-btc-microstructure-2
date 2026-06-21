@@ -1,0 +1,50 @@
+% called by main.tex
+%
+\chapter{Despliegue}
+\label{ch::despliegue}
+
+Este capítulo, opcional en la plantilla, documenta la \emph{estrategia} de despliegue. La
+decisión más importante es deliberada y se explica a continuación: el sistema \textbf{no se
+despliega} con capital real, sino que se detiene en una fase de seguimiento en sombra
+(\emph{paper-shadow}).
+
+\section{Estrategia de despliegue y seguimiento en paper-shadow}
+
+\subsection{Por qué no se despliega}
+
+Desplegar una política de decisión económica con cinco días de soporte fuera de muestra
+sería metodológicamente imprudente, por mucho que el intervalo de confianza sea estrecho y
+los cinco días positivos. Cinco días no constituyen una validación definitiva, y un sistema
+que opera con capital real es especialmente sensible al sobreajuste cuando el horizonte de
+datos es reducido. Por coherencia con la tesis del trabajo —que la honestidad del protocolo
+prevalece sobre cualquier número concreto— el proyecto se detiene antes de operar.
+
+\subsection{Seguimiento \emph{paper-shadow}}
+
+En su lugar, el sistema se mantiene en \emph{paper-shadow}: se registra, operación a
+operación, lo que la política \emph{habría} hecho, sin arriesgar capital. Esta
+infraestructura produce una contabilidad detallada, un resumen diario y, sobre todo, una
+puerta de decisión cuantitativa que determina cuándo —si alguna vez— tendría sentido pasar a
+una fase superior. Las reglas de promoción son deliberadamente conservadoras y exigen
+soporte temporal, no solo neto positivo:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Candidato a paper-shadow:} neto superior a 0,5 ticks, al menos 200
+  operaciones y al menos 8 días de soporte.
+  \item \textbf{Candidato a despliegue:} neto superior a 0,5 ticks, al menos 400 operaciones
+  y al menos 12 días de soporte.
+\end{itemize}
+
+Con los datos actuales (318 operaciones, 5 días), el candidato no alcanza el primer umbral
+por falta de días, y queda explícitamente en estado \emph{prometedor pero con datos
+insuficientes}.
+
+\subsection{Diseño de una hipotética API de inferencia}
+
+A título de trabajo futuro, un despliegue eventual tomaría la forma de un servicio de
+inferencia que, dado el estado del mercado en el instante actual, calcularía las 36
+características causales, consultaría las dos cabezas del especialista y devolvería una
+decisión (operar o no) junto con el valor esperado y la probabilidad de salud. Ese servicio
+incorporaría, además, los filtros estrictos de entorno y el filtro de volatilidad como
+guardas previas, y un mecanismo de inhibición ante datos obsoletos. Su construcción solo
+estaría justificada una vez superadas las puertas de promoción anteriores.

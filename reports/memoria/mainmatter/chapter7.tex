@@ -1,0 +1,47 @@
+% called by main.tex
+%
+\chapter{Reproducibilidad}
+\label{ch::reproducibilidad}
+
+\section{Enlace a repositorio GitHub}
+
+El código, los registros de resultados y los artefactos necesarios para reproducir el trabajo
+se publican en un repositorio público:
+
+\begin{center}
+\url{https://github.com/marcmaldonadolorca/polymarket-btc-microstructure}
+\end{center}
+
+\subsection{Estructura del repositorio}
+
+El repositorio se organiza en los siguientes directorios:
+
+\begin{description}[align=right,labelwidth=2.6cm]
+\item [\texttt{config/}] Umbrales congelados de la política y configuraciones del arco.
+\item [\texttt{docs/}] Documentos canónicos del proceso, renumerados de forma secuencial.
+\item [\texttt{notebooks/}] Cuadernos pedagógicos ejecutados (EDA, particiones, objetivo,
+línea base, latencia, secuencias, corrección del \emph{score} adverso y especialista).
+\item [\texttt{scripts/}] Puntos de entrada reproducibles de cada experimento.
+\item [\texttt{src/}] Paquete con la lógica compartida (datos, características, modelos,
+evaluación), con pruebas automatizadas.
+\item [\texttt{results/}] Tablas de resultados clave filtradas al arco.
+\item [\texttt{sql/}] Esquema de la consulta base de entrenamiento.
+\item [\texttt{reports/}] Esta memoria (fuente LaTeX).
+\end{description}
+
+\subsection{Cómo reproducir}
+
+El entorno se prepara con un entorno virtual de Python y la instalación de las dependencias
+declaradas. Los \emph{scripts} de experimentos son los puntos de entrada del arco y, por
+diseño, se ejecutan desde la raíz del repositorio (resuelven rutas relativas). La política
+congelada y sus umbrales están fijados en un fichero de configuración versionado, de modo que
+los resultados del candidato final son reproducibles a partir de los artefactos publicados.
+
+\subsection{Datos no publicados}
+
+El conjunto de datos completo (del orden de 2,6 millones de filas \emph{cross-venue} del
+corpus principal y la base de datos del sistema de captura) no se publica por su tamaño y por
+privacidad. El repositorio incluye, en su lugar, el esquema de la consulta base
+(\texttt{sql/}), muestras pequeñas representativas y todo el código necesario para reconstruir
+el \emph{pipeline} sobre datos equivalentes. Esta práctica de trazabilidad mitiga la deuda
+técnica inherente a estos sistemas~\cite{sculley2015debt}.

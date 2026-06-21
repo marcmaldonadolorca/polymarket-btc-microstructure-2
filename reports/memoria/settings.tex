@@ -1,0 +1,91 @@
+% **************************************************
+% Settings
+% **************************************************
+% --------------------------
+% Packages
+% --------------------------
+\usepackage[spanish,english,es-tabla,es-noshorthands]{babel}  % es-noshorthands: evita que < > " activen atajos (conflicto con TikZ)
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}     % Use a modern font (that is not pixelated)
+\usepackage[protrusion=true, expansion=false]{microtype}  % expansion=false: compatible con XeTeX/tectonic
+\usepackage{amsmath,amssymb} 
+\usepackage{tabularx}    % tables spanning the full text width
+\usepackage{multicol}    % multi-columns in tables
+\usepackage{multirow}    % multi-rows in tables
+\usepackage{longtable}   % tables spanning more than one page
+\usepackage{booktabs}    % nicer horizontal rules in tables
+\usepackage{ltablex}
+\usepackage{setspace}
+\usepackage{tikz}                % drawing custom shapes
+\usetikzlibrary{positioning,arrows.meta,calc,fit,backgrounds}  % librerías usadas en los diagramas
+\usepackage{graphicx,graphics}   % packages to manage images
+% \usepackage{subfigure}         % (obsoleto; en conflicto con subcaption, usado abajo)
+\usepackage[export]{adjustbox}
+\usepackage{ragged2e} 
+\usepackage{comment} 
+\usepackage{blindtext}
+\usepackage[acronym,nonumberlist,nomain]{glossaries}  % package for list of acronyms
+\usepackage{hyperref}
+\usepackage[a4paper]{geometry}
+\usepackage{parskip}     % paragraph spacing (suppress indentation)
+\usepackage{fancyhdr}    % personalizar encabezado
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{emptypage}   % no headers in empty pages
+\usepackage[small,hang,bf]{caption}    % caption options
+\usepackage{subcaption}   
+
+%%% BIBLIOGRAPHY
+% The style used is APA. A list of available styles is available  at https://www.overleaf.com/learn/latex/Biblatex_bibliography_styles
+
+% NOTA (tooling): la plantilla oficial usa biblatex+biber con estilo APA. En este
+% entorno se compila con tectonic, que no incluye biber, por lo que la bibliografía
+% se gestiona de forma manual (mainmatter/references.tex) y este bloque queda
+% desactivado. Para recuperar la bibliografía APA oficial (p. ej. compilando en
+% Overleaf, que sí trae biber), descomenta este bloque y \printbibliography en main.tex.
+%
+% \usepackage[
+% backend=biber,
+% style=apa,
+% sorting=nyt,
+% doi=true,
+% url=false,
+% isbn=false,
+% backref=false
+% ]{biblatex}
+%
+% \addbibresource{thesisRefs.bib}
+
+% --------------------------
+% Customize document
+% --------------------------
+% Define the geometry of the document
+\newgeometry {top=2.5cm, bottom=2.5cm, right=2.5cm, left=2.5cm}
+
+\setlength{\parskip}{10pt}   % Change the default value
+
+% hiperlinks
+\hypersetup{
+    colorlinks=true,          % Enable colored links
+    linkcolor=black,          % Color for internal links
+    urlcolor=blue,
+    citecolor=blue
+}
+
+% Header and footer
+\fancyhf{}   % Clear the default header and footer
+\renewcommand{\headrulewidth}{0.2pt}
+ 
+\fancyhead[RO]{\nouppercase \leftmark}  % Define the header for odd and even pages
+\fancyhead[LE]{\thesisAuthor}           % Define the header for odd and even pages
+\fancyfoot[C]{\thepage}
+
+\addto\captionsspanish{\renewcommand{\contentsname}{Tabla de Contenido}}
+\addto\captionsspanish{\renewcommand{\listfigurename}{Lista de Figuras}}
+\addto\captionsspanish{\renewcommand{\listtablename}{Lista de Tablas}}
+
+% Increase indentation in lists
+\newlist{mydescription}{description}{1}
+\setlist[mydescription,1]{labelindent=2em, leftmargin=2em}
+

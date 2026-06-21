@@ -1,0 +1,111 @@
+% Anexos (cargado por main.tex tras \appendix)
+
+\chapter{Glosario de términos}
+\label{anexo:glosario}
+
+Glosario pensado para el lector no familiarizado con las criptomonedas ni con la
+microestructura de mercado. Recoge los términos empleados a lo largo de la memoria.
+
+\begin{description}[align=left, leftmargin=3.2cm, labelwidth=3cm, font=\bfseries]
+\item[Mercado de predicción] Mercado en el que se negocian contratos cuyo valor depende del
+resultado de un acontecimiento futuro.
+\item[Contrato binario] Contrato que paga una unidad si el suceso ocurre y cero si no; su
+precio vive entre 0 y 1 y se interpreta como probabilidad.
+\item[Polymarket] Plataforma de mercados de predicción descentralizada, con emparejamiento
+fuera de cadena y liquidación en cadena.
+\item[Libro de órdenes (LOB)] Lista, ordenada por precio, de las órdenes de compra y venta
+pendientes de ejecución.
+\item[Bid / Ask] Mejor precio de compra (\emph{bid}) y mejor precio de venta (\emph{ask}).
+\item[Spread] Diferencia entre \emph{ask} y \emph{bid}; primer coste de cruzar el mercado.
+\item[Profundidad] Volumen disponible en cada nivel de precio del libro.
+\item[Precio medio (\emph{mid})] Punto medio entre \emph{bid} y \emph{ask}.
+\item[Tick] Variación mínima de precio del mercado; unidad de medida de los resultados.
+\item[Microestructura] Estudio de cómo se forman los precios a partir de órdenes, \emph{spread},
+profundidad y flujo, a escalas de tiempo muy finas.
+\item[Markout] Movimiento del precio desde el instante de ejecución a lo largo de un horizonte;
+sirve para medir si una operación fue buena.
+\item[Latencia] Retardo entre observar la oportunidad y ejecutar la orden.
+\item[Spot / Perpetuo] Mercado de Bitcoin al contado (\emph{spot}) y de futuros sin vencimiento
+(\emph{perpetual futures}); referencias externas del contrato.
+\item[Oráculo de precios] Fuente externa que aporta el precio de referencia de Bitcoin.
+\item[Volatilidad realizada] Medida de cuánto se ha movido el precio recientemente.
+\item[Ventana \emph{prestart}] Intervalo inmediatamente anterior a la apertura del mercado.
+\item[Validación temporal] Partición de los datos respetando el orden del tiempo (entrenar con
+el pasado, evaluar con el futuro).
+\item[Fuera de muestra (OOS)] Datos no usados ni para entrenar ni para seleccionar.
+\item[Fuera de pliegue (OOF)] Protocolo en el que las predicciones que consume una segunda etapa
+proceden siempre de un modelo que no las entrenó.
+\item[Fuga temporal] Filtración de información del futuro hacia el entrenamiento o las
+características; principal fuente de resultados ilusorios.
+\item[Congelación] Fijar el modelo y los umbrales antes de observar el conjunto fuera de muestra.
+\item[Drawdown] Mayor caída acumulada desde un máximo previo.
+\item[\emph{Bootstrap}] Remuestreo con reemplazo para estimar la incertidumbre de un resultado.
+\item[Paper-shadow] Seguimiento en sombra: se registra lo que la política habría hecho, sin
+arriesgar capital.
+\item[Gradient boosting] Familia de modelos que suma muchos árboles de decisión, cada uno
+corrigiendo los errores del anterior.
+\end{description}
+
+\chapter{Conjunto de características}
+\label{anexo:features}
+
+El especialista final emplea 36 características causales sin variables de reloj
+(\emph{no\_clock}), agrupadas por bloques:
+
+\begin{itemize}[noitemsep]
+\item \textbf{Estado local del libro de Polymarket:} precio medio, \emph{spread}, microprice,
+desbalance de órdenes, coste visible de entrada y deltas recientes del precio.
+\item \textbf{Referencias externas:} retornos orientados del mercado al contado y de los
+futuros perpetuos a 2 y 8 segundos; medidas de consenso y de actualización.
+\item \textbf{Volatilidad:} volatilidad realizada del perpetuo a 5 segundos (también usada por
+el filtro de volatilidad).
+\item \textbf{Contexto de ventana:} fase de la ventana \emph{prestart} y proxies de calidad del
+libro (cobertura, indicadores de degradación).
+\end{itemize}
+
+Se excluyen deliberadamente las variables de reloj (hora, minuto, segundo) para evitar que el
+modelo aprenda atajos temporales triviales.
+
+\chapter{Hiperparámetros de los modelos}
+\label{anexo:hiperparametros}
+
+\begin{table}[h]
+\centering
+\caption{Hiperparámetros principales del especialista (HistGradientBoosting, dos cabezas).}
+\begin{tabular}{ll}
+\toprule
+\textbf{Hiperparámetro} & \textbf{Valor} \\
+\midrule
+Tasa de aprendizaje & 0,045 \\
+Iteraciones máximas & 220 (con parada anticipada) \\
+Fracción de validación interna & 0,15 \\
+Máximo de hojas por árbol & 15 \\
+Mínimo de muestras por hoja & 120 \\
+Regularización L2 & 0,10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Hiperparámetros principales de los modelos profundos (línea de exploración).}
+\begin{tabular}{ll}
+\toprule
+\textbf{Hiperparámetro} & \textbf{Valor} \\
+\midrule
+Optimizador & AdamW \\
+Tasa de aprendizaje & 0,0015 \\
+Decaimiento de pesos & $10^{-4}$ \\
+Tamaño de lote & 192 \\
+Paciencia (parada anticipada) & 18 épocas \\
+Dimensión oculta de la GRU & 56 \\
+\emph{Dropout} (\emph{BookEncoder}) & 0,08 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La política congelada opera con dos umbrales: valor esperado predicho superior a 0,75 y
+probabilidad de salud no inferior a 0,50. El filtro de volatilidad habilita la operativa cuando
+la volatilidad realizada a 5 segundos no supera 0,6657 (percentil 80 de la volatilidad de
+entrenamiento). El intervalo de confianza se estima por \emph{bootstrap} con 5\,000 remuestreos
+y semilla fija.

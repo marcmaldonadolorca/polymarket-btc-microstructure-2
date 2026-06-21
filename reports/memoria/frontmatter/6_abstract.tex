@@ -1,0 +1,54 @@
+% called by main.tex
+%
+
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+\label{sec::abstract}
+
+This work studies whether deep learning can exploit market microstructure signals to
+anticipate the short-term price movement of binary contracts on Bitcoin traded on
+Polymarket, a prediction market. Unlike the literature focused on how the event finally
+resolves, here we target the local movements of the contract price over windows of a few
+seconds, combining the order book with external Bitcoin market references (spot, perpetual
+futures and a price oracle). The main contribution is not a single model but a
+reproducible methodology: a multi-source data capture system with per-session quality
+control, strictly temporal validation, and an evaluation that incorporates realistic
+execution costs and latency. The central, uncomfortable finding is that a directional
+classifier that is correct nearly nine out of ten times stops being profitable once a
+realistic two-second entry latency is introduced: what decides the outcome is cost and
+execution, not directional accuracy. Building on this, we evaluate a progression of models
+(tabular baselines, latency-aware models, and sequential and convolutional architectures
+over the order book) and a frozen tabular specialist combined with a volatility filter.
+This candidate survives a five-day out-of-sample validation under cost, reaching a positive
+net result per trade with a narrow bootstrap confidence interval and five out of five
+positive days. We report every figure in net ticks together with its support and
+uncertainty, and we do not claim real profitability: the deliverable is the methodology,
+the evidence obtained under an honest protocol, and the explicit delimitation of its
+limits.
+
+\newpage
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+\label{sec::resumen}
+
+Este trabajo estudia si el aprendizaje profundo puede aprovechar señales de
+microestructura de mercado para anticipar el movimiento de corto plazo del precio de los
+contratos binarios sobre Bitcoin negociados en Polymarket, un mercado de predicción. A
+diferencia de la literatura centrada en cómo se resuelve finalmente el evento, aquí el
+objetivo son los movimientos locales del precio del contrato en ventanas de pocos
+segundos, combinando el libro de órdenes con referencias externas del mercado de Bitcoin
+(contado, futuros perpetuos y un oráculo de precios). La aportación principal no es un
+modelo concreto, sino una metodología reproducible: un sistema de captura de datos
+multifuente con control de calidad por sesión, una validación estrictamente temporal y una
+evaluación que incorpora costes de ejecución y latencia realistas. El hallazgo central, y
+algo incómodo, es que un clasificador direccional que acierta casi nueve de cada diez veces
+deja de ser rentable en cuanto se introduce una latencia de entrada realista de dos
+segundos: lo que decide el resultado es el coste y la ejecución, no el acierto direccional.
+A partir de ahí se evalúa una progresión de modelos (líneas base tabulares, modelos
+sensibles a la latencia y arquitecturas secuenciales y convolucionales sobre el libro de
+órdenes) y un especialista tabular congelado combinado con un filtro de volatilidad. Ese
+candidato sobrevive a una validación fuera de muestra de cinco días bajo coste, con un neto
+positivo por operación, un intervalo de confianza bootstrap estrecho y cinco de cinco días
+positivos. Todos los resultados se reportan en ticks netos junto a su soporte e
+incertidumbre, y no se afirma rentabilidad real: lo que se entrega es la metodología, la
+evidencia obtenida bajo un protocolo honesto y la delimitación explícita de sus límites.
