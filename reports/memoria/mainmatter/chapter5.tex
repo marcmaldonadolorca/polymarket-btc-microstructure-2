@@ -46,10 +46,21 @@ insuficientes}.
 
 \subsection{Diseño de una hipotética API de inferencia}
 
-A título de trabajo futuro, un despliegue eventual tomaría la forma de un servicio de
-inferencia que, dado el estado del mercado en el instante actual, calcularía las 36
-características causales, consultaría las dos cabezas del especialista y devolvería una
-decisión (operar o no) junto con el valor esperado y la probabilidad de salud. Ese servicio
-incorporaría, además, los filtros estrictos de entorno y el filtro de volatilidad como
-guardas previas, y un mecanismo de inhibición ante datos obsoletos. Su construcción solo
-estaría justificada una vez superadas las puertas de promoción anteriores.
+A título de trabajo futuro, y solo si se superasen las puertas de promoción anteriores, un
+despliegue eventual tomaría la forma de un servicio de inferencia con cuatro etapas
+encadenadas. Primero, una etapa de ingesta que reconstruyese en tiempo real el estado del
+mercado sobre la malla de dos segundos a partir de las mismas fuentes de captura. Segundo,
+una etapa de cálculo que generase las 36 características causales del instante actual,
+idéntica a la del entrenamiento para evitar discrepancias entre entrenamiento y producción
+(\emph{train/serve skew}). Tercero, una etapa de decisión que consultase las dos cabezas del
+especialista y devolviese una recomendación (operar o no) junto con el valor esperado y la
+probabilidad de salud. Y cuarto, una capa de guardas que aplicase, antes de cualquier
+recomendación, los filtros estrictos de entorno, el filtro de volatilidad y un mecanismo de
+inhibición que cortase la operativa ante datos obsoletos o degradados.
+
+Por encima de ese servicio operaría una capa de monitorización que vigilase la deriva de
+distribución (especialmente el régimen de volatilidad), registrase cada decisión para
+auditoría y dispusiese de un interruptor de parada inmediata. Conviene insistir en que esta
+arquitectura es un \emph{diseño}, no una implementación: su desarrollo solo tendría sentido
+tras acumular el soporte temporal que hoy falta, y siempre manteniendo el principio de
+detenerse ante cualquier señal de degradación.

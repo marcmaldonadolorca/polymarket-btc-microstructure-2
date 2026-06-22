@@ -17,17 +17,20 @@ obsoletos— y después se resume la composición del corpus y su análisis expl
 
 \subsection{Sistema de captura multifuente}
 
-Los datos de mercado se registran mediante una herramienta de captura desarrollada
-específicamente para este trabajo, cuyo código forma parte del repositorio público
-(Capítulo~\ref{ch::reproducibilidad}). Por cada sesión de mercado, la herramienta anota
-cuatro tipos de información: (i) el libro de órdenes del contrato de Polymarket y su flujo de
-operaciones; (ii) los metadatos del mercado (tamaño de tick, ventana temporal, comisiones);
-(iii) referencias externas del mercado de Bitcoin —el mercado al contado (\emph{spot}) y los
-futuros perpetuos (\emph{perpetual futures})—; y (iv) un oráculo de precios que aporta el
-precio de referencia. La fuente de verdad es una base de datos relacional sobre la que se
-construyen las características; el repositorio incluye el esquema de esa consulta y una
-muestra representativa de los datos. Todas las fuentes se alinean en el tiempo sobre una
-malla regular de dos segundos, como se detalla a continuación (Figura~\ref{fig:captura}).
+Los datos de mercado se registran mediante una herramienta de captura propia, desarrollada
+específicamente para este trabajo. Por su carácter sensible, esta herramienta no se publica y
+aquí se describe únicamente a nivel funcional; lo que sí se publica
+(Capítulo~\ref{ch::reproducibilidad}) es el esquema de la consulta de datos, una muestra
+representativa y todo el código de análisis y modelado. A nivel funcional, por cada sesión de
+mercado la herramienta anota cuatro tipos de información: (i) el libro de órdenes del contrato
+de Polymarket y su flujo de operaciones; (ii) los metadatos del mercado (tamaño de tick,
+ventana temporal, comisiones); (iii) referencias externas del mercado de Bitcoin —el mercado
+al contado (\emph{spot}) y los futuros perpetuos (\emph{perpetual futures})—; y (iv) un
+oráculo de precios que aporta el precio de referencia. La fuente de verdad es una base de
+datos relacional sobre la que se construyen las características; de ella se publican el
+esquema y una muestra representativa, pero no los datos completos. Todas las fuentes se
+alinean en el tiempo sobre una malla regular de dos segundos, como se detalla a continuación
+(Figura~\ref{fig:captura}).
 
 \begin{figure}[h]
 \centering
@@ -166,7 +169,9 @@ posterior:
   \item \textbf{Patrón \emph{prestart}.} La ventana inmediatamente anterior a la apertura
   del mercado concentra una densidad atípica de cancelaciones, modificaciones y cruces, lo
   que sugiere reposicionamiento de los participantes y una señal de microestructura
-  diferenciada. Esta observación motiva el especialista descrito más adelante.
+  diferenciada. Esta observación motiva el \emph{modelo especialista} ---un modelo entrenado
+exclusivamente para esa ventana, en lugar de uno generalista--- que se describe más adelante
+en este capítulo.
   \item \textbf{Acoplamiento con Bitcoin.} La correlación entre el precio del contrato y las
   referencias de Bitcoin es clara en ventanas de minutos pero se diluye en ventanas de
   segundos: el arbitraje externo no es instantáneo. Esa separación de escalas justifica

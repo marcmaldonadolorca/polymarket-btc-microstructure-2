@@ -71,10 +71,14 @@ Sus elementos esenciales son:
 
 La \emph{microestructura de mercado} es la rama que estudia cómo se forman los precios a
 partir de estos mecanismos —órdenes, \emph{spread}, profundidad y flujo de
-operaciones— a escalas de tiempo muy finas. La Figura~\ref{fig:mercado} resume el entorno:
-el precio del contrato se forma en su propio libro de órdenes, pero está acoplado a
-referencias externas del mercado de Bitcoin (mercado al contado, futuros perpetuos y un
-oráculo de precios), porque al fin y al cabo el contrato habla del precio de Bitcoin.
+operaciones— a escalas de tiempo muy finas. En este contexto, se entiende por
+\emph{señales de microestructura} las variables derivadas del propio libro de órdenes (por
+ejemplo, el desbalance entre compra y venta, la presión del microprice o los cambios
+recientes del \emph{spread}) que podrían contener información anticipatoria sobre el
+movimiento inmediato del precio. La Figura~\ref{fig:mercado} resume el entorno: el precio del
+contrato se forma en su propio libro de órdenes, pero está acoplado a referencias externas
+del mercado de Bitcoin (mercado al contado, futuros perpetuos y un oráculo de precios), ya
+que, en última instancia, el contrato se refiere al precio de Bitcoin.
 
 \begin{figure}[h]
 \centering
@@ -120,8 +124,10 @@ cómo se calibra el precio frente a la resolución final del evento, aquí el in
 los movimientos locales del precio, a escala de segundos.
 
 Conviene fijar desde el principio un matiz que vertebra todo el trabajo: una buena
-capacidad de \emph{predecir la dirección} no implica una estrategia rentable. Una métrica
-de clasificación puede ser muy alta y, aun así, el sistema no ser explotable si opera con
+capacidad de \emph{predecir la dirección} no implica una estrategia rentable. Esta
+distinción está bien documentada en la literatura de microestructura y de aprendizaje
+automático en finanzas~\cite{kearns2013,lopezdeprado2018,bailey2014deflated}: una métrica de
+clasificación puede ser muy alta y, aun así, el sistema no ser explotable si opera con
 retraso, si aprende artefactos del propio conjunto de datos o si ignora el coste real de
 cruzar una orden. Por eso el problema no se evalúa por el acierto, sino por el resultado
 económico neto, una vez descontados costes y latencia realistas.

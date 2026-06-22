@@ -74,7 +74,7 @@ máximo es de 88,1 ticks.}
 
 \subsection{El papel del filtro de volatilidad}
 
-El filtro de volatilidad aporta la mayor parte de la ventaja, y no por casualidad, sino
+El filtro de volatilidad aporta la mayor parte de la ventaja, y no de forma accidental, sino
 porque el régimen del conjunto fuera de muestra difiere del de entrenamiento
 (Figura~\ref{fig:regimen}). Sin el filtro, el neto medio (coste 0,5) desciende a $+0{,}349$
 ticks; con él, asciende a $+1{,}069$. La contribución del filtro es, por tanto, de unos
@@ -142,9 +142,19 @@ el arco del trabajo. Las redes recurrentes y convolucionales sobre el libro apre
 representación —algunas políticas \emph{proxy} resultan positivas dentro de muestra—, pero
 esa ventaja no sobrevive cuando se exige selección causal día a día y estabilidad en todo el
 bloque de test. Con un horizonte de datos de unas dos semanas, la capacidad necesaria para
-generalizar temporalmente excede lo que las redes pueden estimar de forma fiable. El modelo
-tabular con regularización agresiva, en cambio, sí produce una política que sobrevive a la
-validación fuera de muestra.
+generalizar temporalmente excede lo que las redes pueden estimar de forma fiable.
+
+La explicación es coherente con el equilibrio entre sesgo y varianza. Las arquitecturas
+profundas tienen una varianza alta: con pocos miles de ejemplos memorizan patrones del
+periodo de entrenamiento que no se repiten en los días siguientes. El modelo tabular con
+regularización agresiva opera en el extremo opuesto ---pocas hojas por árbol, muchas muestras
+mínimas por hoja y penalización fuerte---, lo que aumenta su sesgo pero reduce drásticamente
+su varianza. Restringir además la operativa a la ventana \emph{prestart} acota el espacio de
+hipótesis a un problema mucho más manejable. Esa combinación es la que permite que el
+especialista produzca una política que sobrevive a la validación fuera de muestra, mientras
+que las redes, más expresivas, no lo consiguen con los datos disponibles. Este resultado no
+descarta el aprendizaje profundo; lo sitúa como una vía a reevaluar cuando el volumen de
+datos crezca de forma sustancial.
 
 \subsection{Experimentos de adaptación al régimen}
 
