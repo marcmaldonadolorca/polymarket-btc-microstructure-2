@@ -10,14 +10,24 @@ trabajo— y la metodología de modelado y entrenamiento.
 
 \section{Descripción del dataset}
 
+Esta sección describe el origen de los datos, su organización temporal y los controles de
+calidad que determinan qué entra en el conjunto de trabajo. Se introducen primero los
+conceptos necesarios —fuentes de datos, malla temporal y contrato de latencia, y datos
+obsoletos— y después se resume la composición del corpus y su análisis exploratorio.
+
 \subsection{Sistema de captura multifuente}
 
-Para este trabajo se desarrolló un sistema de captura propio. Por cada sesión de mercado
-registra el libro de órdenes de Polymarket, el flujo de operaciones, la metadata del
-mercado y un conjunto de referencias externas del mercado de Bitcoin: el mercado al contado
-(\emph{spot}), los futuros perpetuos (\emph{perpetual futures}) y un oráculo de precios.
-Todas esas fuentes se alinean en el tiempo sobre una malla regular de dos segundos
-(Figura~\ref{fig:captura}).
+Los datos de mercado se registran mediante una herramienta de captura desarrollada
+específicamente para este trabajo, cuyo código forma parte del repositorio público
+(Capítulo~\ref{ch::reproducibilidad}). Por cada sesión de mercado, la herramienta anota
+cuatro tipos de información: (i) el libro de órdenes del contrato de Polymarket y su flujo de
+operaciones; (ii) los metadatos del mercado (tamaño de tick, ventana temporal, comisiones);
+(iii) referencias externas del mercado de Bitcoin —el mercado al contado (\emph{spot}) y los
+futuros perpetuos (\emph{perpetual futures})—; y (iv) un oráculo de precios que aporta el
+precio de referencia. La fuente de verdad es una base de datos relacional sobre la que se
+construyen las características; el repositorio incluye el esquema de esa consulta y una
+muestra representativa de los datos. Todas las fuentes se alinean en el tiempo sobre una
+malla regular de dos segundos, como se detalla a continuación (Figura~\ref{fig:captura}).
 
 \begin{figure}[h]
 \centering
@@ -46,24 +56,76 @@ de dos segundos, pasan un control de calidad por sesión y forman el corpus.}
 \label{fig:captura}
 \end{figure}
 
-La elección de la malla de dos segundos no es un detalle accesorio: fija el
-\emph{contrato de latencia} con el que después se evalúa. En lugar de interpolar un instante
-no observado, las predicciones se miden contra la siguiente fotografía real del mercado, lo
-que hace la evaluación conservadora y realista.
+\subsection{Malla temporal y contrato de latencia}
+
+Las observaciones se organizan sobre una malla temporal regular: una secuencia de instantes
+$t_0, t_1, t_2, \dots$ separados exactamente dos segundos, de modo que $t_{k+1} = t_k + 2$
+segundos. En cada instante $t_k$ se toma una ``fotografía'' del estado del mercado (libro de
+órdenes y referencias externas). La elección de este intervalo no es accesoria, porque define
+lo que en este trabajo se denomina \emph{contrato de latencia}: el supuesto sobre cuánto
+tarda una decisión en poder ejecutarse. En lugar de interpolar un instante intermedio que
+nunca se observó, una decisión tomada con la información de $t_k$ se evalúa contra la
+siguiente fotografía real, $t_{k+1}$; es decir, se asume que entre observar la señal y poder
+operar transcurre, como mínimo, el intervalo de la malla. Este criterio hace la evaluación
+deliberadamente conservadora y evita el error habitual de suponer ejecución instantánea.
 
 \subsection{Controles de calidad por sesión}
 
-Antes de incorporarse al corpus, cada sesión pasa una serie de controles de calidad:
-cobertura temporal, continuidad, proporción de datos obsoletos (\emph{stale}), validación
-del arranque y detección de huecos severos. La sesión que no supera los umbrales se
-descarta. Esta decisión es deliberada: una referencia externa retrasada o incompleta puede
-inducir una señal espuria, y se prefiere reducir el tamaño de la muestra antes que
-contaminar el entrenamiento con ruido disfrazado de patrón.
+La calidad de los datos es tan crítica como el modelo: una referencia externa retrasada o
+incompleta puede inducir una señal que en realidad no existe. Por ello, antes de incorporarse
+al conjunto de trabajo, cada sesión de mercado pasa una batería de controles de calidad y se
+descarta por completo si no los supera (Figura~\ref{fig:qa}). Conviene definir primero un
+concepto recurrente: un dato \emph{obsoleto} (en inglés \emph{stale}) es un valor que no se ha
+actualizado cuando debería haberlo hecho —por ejemplo, una cotización externa que permanece
+``congelada'' varios instantes de la malla porque su fuente dejó de emitir—. Un dato obsoleto
+parece información válida, pero no lo es, y es una de las principales fuentes de señales
+espurias.
+
+Los controles aplicados a cada sesión son los siguientes:
+\begin{description}[noitemsep, leftmargin=2.6cm, font=\bfseries]
+\item[Cobertura] Fracción de instantes de la malla efectivamente observados respecto a los
+esperados durante la sesión; una cobertura baja indica una captura incompleta.
+\item[Continuidad] Ausencia de interrupciones prolongadas en el registro de las fuentes.
+\item[Obsolescencia] Proporción de instantes con datos \emph{stale}; si una referencia se
+queda congelada demasiado tiempo, la sesión se rechaza.
+\item[Arranque] Validación de que la sesión comenzó a capturarse correctamente, sin un
+periodo inicial degradado.
+\item[Huecos severos] Detección de saltos temporales grandes que la malla no puede rellenar
+de forma fiable.
+\end{description}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[font=\small, node distance=5mm and 9mm, >=Latex,
+  io/.style={draw, rounded corners, fill=blue!6, align=center, minimum height=8mm, inner sep=4pt},
+  chk/.style={draw, fill=yellow!12, align=center, minimum height=8mm, inner sep=3pt},
+  good/.style={draw, rounded corners, fill=green!12, align=center, minimum height=8mm, inner sep=4pt},
+  bad/.style={draw, rounded corners, fill=red!12, align=center, minimum height=8mm, inner sep=4pt},
+]
+\node[io] (s) {Sesión\\capturada};
+\node[chk, right=of s] (c) {Cobertura, continuidad,\\\emph{stale}, arranque, huecos};
+\node[good, right=of c] (ok) {Aceptada:\\entra al corpus};
+\node[bad, below=8mm of ok] (no) {Rechazada:\\se descarta};
+\draw[-{Latex}] (s) -- (c);
+\draw[-{Latex}] (c) -- node[above, font=\scriptsize] {supera umbrales} (ok);
+\draw[-{Latex}] (c.south) |- node[below, pos=0.25, font=\scriptsize] {falla algún umbral} (no.west);
+\end{tikzpicture}
+\caption{Flujo del control de calidad por sesión. Solo las sesiones que superan todos los
+umbrales se incorporan al corpus.}
+\label{fig:qa}
+\end{figure}
+
+Esta política es deliberadamente estricta: se prefiere reducir el tamaño de la muestra antes
+que contaminar el entrenamiento con ruido disfrazado de patrón. Como consecuencia, el corpus
+efectivo es sensiblemente menor que el total capturado, lo que más adelante justifica la
+estrategia de regularización agresiva.
 
 \subsection{Composición del corpus}
 
-El corpus principal abarca del 11 al 25 de mayo de 2026 (entrenamiento, validación y test
-terminal), con del orden de 2,6 millones de filas \emph{cross-venue}. Como conjunto fuera
+Se denomina \emph{corpus} al conjunto de todas las sesiones aceptadas tras el control de
+calidad; sobre él se definen después las particiones temporales (entrenamiento, validación y
+test). El corpus principal abarca del 11 al 25 de mayo de 2026, con del orden de 2,6 millones
+de filas multifuente (\emph{cross-venue}). Como conjunto fuera
 de muestra se reservó del 6 al 10 de junio de 2026, capturado con posterioridad a la
 congelación del candidato (Sección~\ref{sec:congelacion}). La unidad de observación es la
 tupla \texttt{sesión $\times$ token $\times$ instante} sobre la malla de dos segundos. La
@@ -113,6 +175,11 @@ posterior:
 
 \section{Resultados en modelos baseline}
 
+Antes de introducir cualquier modelo complejo conviene establecer una línea base sencilla y
+medir su comportamiento bajo condiciones realistas. Esta sección muestra que una línea base
+tabular alcanza una precisión direccional muy alta y, sin embargo, deja de ser rentable al
+introducir la latencia; este resultado es la observación que reorienta todo el trabajo.
+
 \subsection{Línea base tabular y el impacto de la latencia}
 
 Una línea base tabular sobre el horizonte corto (16 segundos) alcanza una precisión
@@ -155,6 +222,12 @@ ejecución; a partir de aquí, todo modelo se evalúa por su política económic
 latencia, no por su acierto.
 
 \section{Metodología y entrenamiento}
+
+Esta sección detalla cómo se define el objetivo de aprendizaje, cómo se valida sin incurrir
+en fugas temporales, cómo se modelan los costes y la latencia, qué métricas deciden y qué
+progresión de modelos se evaluó hasta llegar al candidato final. El hilo conductor es que
+cada decisión metodológica está orientada a un objetivo: evitar resultados ilusorios y medir
+el rendimiento económico real.
 
 \subsection{Definición del objetivo}
 

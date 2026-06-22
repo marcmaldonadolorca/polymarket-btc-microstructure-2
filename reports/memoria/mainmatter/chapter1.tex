@@ -17,6 +17,12 @@ de plantear el problema y los objetivos.
 
 \section{Introducción y definición del problema}
 
+Esta sección define el problema desde cero. Antes de plantear la pregunta de
+investigación se introducen los conceptos imprescindibles —mercado de predicción,
+contrato binario, libro de órdenes y señales de microestructura—, de modo que el documento
+resulte autocontenido también para un lector ajeno al mundo de las criptomonedas. Con ese
+vocabulario fijado, se enuncia el problema concreto que se aborda.
+
 \subsection{Qué es un mercado de predicción}
 
 Un \emph{mercado de predicción} es un mercado en el que se compran y venden contratos
@@ -39,7 +45,7 @@ participantes quienes ponen precios mediante un \emph{libro de órdenes}: el emp
 de compras y ventas ocurre fuera de la cadena de bloques (de forma rápida) y la
 liquidación final del dinero se registra en cadena (sobre una \emph{blockchain})
 \cite{polymarket_trading}. En los mercados sobre el precio de Bitcoin, cada contrato
-binario tiene un precio que, como se ha dicho, vive entre 0 y 1 y se interpreta como una
+binario toma valores entre 0 y 1 y se interpreta como una
 probabilidad~\cite{polymarket_prices}. Esto convierte cada mercado en un pequeño
 \emph{mercado electrónico} (\emph{exchange}) con su propia dinámica de oferta y demanda.
 
@@ -158,11 +164,12 @@ costes y latencia realistas}. De él se derivan los siguientes objetivos especí
   bajo coste, y delimitar con rigor sus límites y su incertidumbre.
 \end{enumerate}
 
-\paragraph{Estructura de la memoria.} El Capítulo~\ref{ch::estado} revisa el estado de la
-cuestión. El Capítulo~\ref{ch::metodos} describe los datos, las líneas base y la
-metodología de modelado. El Capítulo~\ref{ch::resultados} presenta y analiza los
-resultados. El Capítulo~\ref{ch::despliegue} discute la estrategia de despliegue. El
-Capítulo~\ref{ch::etica} aborda los aspectos éticos y las limitaciones. El
-Capítulo~\ref{ch::reproducibilidad} detalla la reproducibilidad, y el
-Capítulo~\ref{ch::conclusiones} recoge las conclusiones. Los anexos incluyen un glosario
-de términos para el lector no familiarizado con las criptomonedas.
+El presente trabajo se organiza como sigue. El Capítulo~\ref{ch::estado} revisa el estado
+de la cuestión. El Capítulo~\ref{ch::metodos} describe los datos, las líneas base y la
+metodología de modelado y entrenamiento. El Capítulo~\ref{ch::resultados} presenta y
+analiza los resultados sobre el conjunto fuera de muestra. El Capítulo~\ref{ch::despliegue}
+discute la estrategia de despliegue. El Capítulo~\ref{ch::etica} aborda los aspectos éticos
+y las limitaciones. El Capítulo~\ref{ch::reproducibilidad} detalla la reproducibilidad, y
+el Capítulo~\ref{ch::conclusiones} recoge las conclusiones. Por último, los anexos incluyen
+un glosario de términos para el lector no familiarizado con las criptomonedas, el detalle de
+las características y los hiperparámetros de los modelos.
