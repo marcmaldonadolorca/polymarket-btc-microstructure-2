@@ -119,7 +119,7 @@ umbrales se incorporan al corpus.}
 \end{figure}
 
 Esta política es deliberadamente estricta: se prefiere reducir el tamaño de la muestra antes
-que contaminar el entrenamiento con ruido disfrazado de patrón. Como consecuencia, el corpus
+que contaminar el entrenamiento con ruido que el modelo podría confundir con una señal. Como consecuencia, el corpus
 efectivo es sensiblemente menor que el total capturado, lo que más adelante justifica la
 estrategia de regularización agresiva.
 
@@ -164,7 +164,7 @@ posterior:
   precisión equilibrada (\emph{balanced accuracy}) y F1 macro.
   \item \textbf{Calidad de los datos.} En los tramos de alta volatilidad, los retardos de
   actualización de las referencias externas abarcan varios ciclos de la malla; tras el
-  filtrado, el corpus efectivo es bastante menor que el total capturado, lo que justifica
+  filtrado, el corpus efectivo es sensiblemente menor que el total capturado, lo que justifica
   una regularización agresiva.
   \item \textbf{Patrón \emph{prestart}.} La ventana inmediatamente anterior a la apertura
   del mercado concentra una densidad atípica de cancelaciones, modificaciones y cruces, lo
@@ -356,7 +356,7 @@ bajo el mismo protocolo de costes y validación (Figura~\ref{fig:escalera}).
   node distance=4mm, font=\small, >=Latex,
   rung/.style={draw, rounded corners, align=center, minimum width=0.84\textwidth, minimum height=8mm, inner sep=3pt},
 ]
-\node[rung, fill=blue!6] (s1) {Línea base tabular H16 (acierto $\sim$90\,\%, pero muere con latencia)};
+\node[rung, fill=blue!6] (s1) {Línea base tabular H16 (acierto $\sim$90\,\%, pero deja de ser rentable con latencia)};
 \node[rung, fill=blue!6, below=of s1] (s2) {Modelos sensibles a la latencia (AUC 0,79; política negativa)};
 \node[rung, fill=blue!8, below=of s2] (s3) {Secuencias y libro: GRU, Conv1D (\emph{BookEncoder}), fusión, TCN (representación sí, política no)};
 \node[rung, fill=orange!10, below=of s3] (s4) {Corrección del \emph{score} de selección adversa; selección de horizonte (H60)};

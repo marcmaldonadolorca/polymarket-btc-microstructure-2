@@ -92,7 +92,7 @@ El porqué se ve con claridad al desglosar las operaciones \emph{fresh} por rég
 (Tabla~\ref{tab:regimen} y Figura~\ref{fig:regimenneto}). Las operaciones de baja volatilidad
 —las que el filtro habilita— son fuertemente positivas, mientras que las de alta volatilidad
 —las que el filtro descarta— son netamente negativas. El filtro no ``mejora'' el modelo: se
-limita a no operar donde el modelo, entrenado en baja volatilidad, no es de fiar.
+limita a no operar donde el modelo, entrenado en baja volatilidad, no es fiable.
 
 \begin{table}[h]
 \centering
@@ -164,7 +164,7 @@ CORAL~\cite{sun2016coral}, un filtro conformal, un \emph{ensemble} por \emph{boo
 filtro de volatilidad adaptativo, características normalizadas por volatilidad y
 \emph{distillation} de una red convolucional temporal. Ninguna superó de forma robusta al
 modelo congelado con su filtro simple. Este resultado negativo es informativo: con tan pocos
-días, un modelo congelado más un filtro sencillo le gana a la adaptación de dominio
+días, un modelo congelado más un filtro sencillo supera a la adaptación de dominio
 sofisticada, que necesita más datos de los disponibles para estimarse de forma fiable. Es,
 además, coherente con la observación de la línea base: la complejidad solo se justifica si
 mejora el resultado bajo el mismo protocolo, y aquí no lo hace.
