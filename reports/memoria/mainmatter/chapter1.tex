@@ -69,6 +69,28 @@ Sus elementos esenciales son:
   natural en la que mediremos todos los resultados de este trabajo.
 \end{itemize}
 
+La Tabla~\ref{tab:lob} muestra, a modo de ejemplo ilustrativo, el aspecto de un libro de
+órdenes con tres niveles a cada lado.
+
+\begin{table}[h]
+\centering
+\caption{Ejemplo ilustrativo de un libro de órdenes (valores inventados con fines
+explicativos, no datos reales). El mejor \emph{bid} es 0,52 y el mejor \emph{ask}, 0,54; por
+tanto el \emph{spread} es de 0,02 y el precio medio, 0,53. Los niveles más alejados del
+centro tienen, típicamente, más volumen acumulado.}
+\label{tab:lob}
+\begin{tabular}{rr|rr}
+\toprule
+\multicolumn{2}{c|}{\textbf{Compra (\emph{bids})}} & \multicolumn{2}{c}{\textbf{Venta (\emph{asks})}} \\
+Precio & Tamaño & Precio & Tamaño \\
+\midrule
+0,52 & 120 & 0,54 & \phantom{0}90 \\
+0,51 & 200 & 0,55 & 150 \\
+0,50 & 340 & 0,56 & 220 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 La \emph{microestructura de mercado} es la rama que estudia cómo se forman los precios a
 partir de estos mecanismos —órdenes, \emph{spread}, profundidad y flujo de
 operaciones— a escalas de tiempo muy finas. En este contexto, se entiende por

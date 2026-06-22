@@ -27,24 +27,35 @@ esta literatura analiza la calibración del precio frente a la resolución final
 El presente trabajo se sitúa un escalón por debajo, en el terreno de la microestructura:
 la dinámica intradía del precio del contrato a escala de segundos, donde aparecen
 \emph{spreads}, profundidad limitada y desajustes transitorios respecto a las referencias
-externas.
+externas. Conviene además precisar el mecanismo: a diferencia de los mercados de predicción
+basados en creadores de mercado automáticos (que fijan el precio mediante una fórmula),
+Polymarket emplea un libro de órdenes, lo que hace aplicable el instrumental clásico de la
+microestructura y justifica el enfoque de este trabajo.
 
 \subsection{Aprendizaje profundo sobre libros de órdenes}
 
 La predicción del movimiento de precios a partir del libro de órdenes es un problema con
 una literatura ya madura. El trabajo de referencia es DeepLOB~\cite{zhang2019deeplob}, que
-combina convoluciones para capturar la estructura espacial del libro con capas recurrentes
-para la dependencia temporal, y se valida sobre el conjunto de referencia
-FI-2010~\cite{ntakaris2018}. En la misma línea, Tsantekidis et al.~\cite{tsantekidis2017}
-emplean redes convolucionales y recurrentes para detectar cambios de precio en el libro.
-Sirignano y Cont~\cite{sirignano2019universal} aportan evidencia de la existencia de
-características universales en la formación de precios que el aprendizaje profundo es capaz
-de capturar, y Jha et al.~\cite{jha2020digital} trasladan estas ideas al terreno de los
-criptoactivos. De esta literatura se toma una decisión de diseño importante: tratar el
-libro de órdenes como un objeto con estructura espacio-temporal, y no como una tabla
-plana. Ahora bien, casi todos estos trabajos se evalúan con métricas de clasificación y
-rara vez bajo un modelo de ejecución realista, que es justamente donde este trabajo pone
-el acento.
+representa el libro como una matriz de dos dimensiones (niveles de precio frente a tiempo) y
+aplica primero módulos convolucionales —que capturan la estructura espacial entre los
+niveles de compra y de venta— y, a continuación, capas recurrentes que modelan la
+dependencia temporal; se valida sobre FI-2010~\cite{ntakaris2018}, un conjunto de referencia
+público de libros de órdenes ampliamente utilizado como banco de pruebas. En la misma línea,
+Tsantekidis et al.~\cite{tsantekidis2017} comparan arquitecturas convolucionales y
+recurrentes para detectar cambios de precio en el libro. Sirignano y
+Cont~\cite{sirignano2019universal} aportan evidencia de la existencia de características
+universales en la formación de precios que el aprendizaje profundo es capaz de capturar, y
+Jha et al.~\cite{jha2020digital} trasladan estas ideas al terreno de los criptoactivos,
+mostrando que el enfoque no es exclusivo de los mercados tradicionales.
+
+De esta literatura este trabajo adopta una decisión de diseño —tratar el libro de órdenes
+como un objeto con estructura espacio-temporal, y no como una tabla plana— y, sobre ella,
+introduce dos cambios. El primero es metodológico: evaluar cada modelo bajo un modelo de
+ejecución realista (coste y latencia), y no solo con métricas de clasificación como es
+habitual en estos trabajos. El segundo es de dominio: aplicar el enfoque a un mercado de
+predicción sobre Bitcoin —y no a un mercado de acciones—, lo que obliga a combinar el libro
+con referencias externas. Esa doble diferencia es, precisamente, donde este trabajo pone el
+acento.
 
 \subsection{Microestructura, costes de ejecución y latencia}
 
@@ -54,7 +65,11 @@ aprendizaje automático en microestructura y negociación de alta frecuencia, y 
 la ejecución, el coste y la latencia condicionan de forma decisiva la viabilidad de una
 señal. Este trabajo cuantifica ese fenómeno en el contexto concreto de Polymarket: se mide
 la latencia real del ciclo de orden y se demuestra que una señal direccional fuerte se
-vuelve no rentable bajo una latencia de entrada modesta.
+vuelve no rentable bajo una latencia de entrada modesta. El cambio que se introduce respecto
+a esta literatura es, de nuevo, metodológico: en lugar de asumir una latencia o un coste
+fijos, ambos se determinan a partir de los datos —la latencia, de forma empírica sobre el
+ciclo de orden real; el coste, de forma relativa al estado del libro en cada instante—, de
+modo que la evaluación económica refleje las condiciones efectivas de ejecución.
 
 \subsection{Aprendizaje automático en finanzas y validación temporal}
 
@@ -78,10 +93,12 @@ existen técnicas de adaptación de dominio, como la alineación de correlacione
 CORAL~\cite{sun2016coral}. En el Capítulo~\ref{ch::resultados} se mostrará un resultado
 contraintuitivo: con un horizonte de datos reducido, estas técnicas no superan a una
 estrategia mucho más simple, consistente en restringir la operativa al régimen en el que
-el modelo fue entrenado. Por último, en cuanto a arquitecturas profundas para series
-temporales multivariantes, trabajos como el \emph{Temporal Fusion
-Transformer}~\cite{lim2021tft} marcan una línea de evolución natural para cuando se
-disponga de muchos más datos.
+el modelo fue entrenado. Además de CORAL, en este trabajo se evalúan otras estrategias de
+adaptación habituales —filtros conformales, \emph{ensembles} y reentrenamiento incremental
+con ventana móvil—, cuyos resultados se detallan en el Capítulo~\ref{ch::resultados}. Por
+último, en cuanto a arquitecturas profundas para series temporales multivariantes, trabajos
+como el \emph{Temporal Fusion Transformer}~\cite{lim2021tft} marcan una línea de evolución
+natural para cuando se disponga de muchos más datos.
 
 \section{Limitaciones en la literatura}
 
