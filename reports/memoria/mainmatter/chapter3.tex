@@ -178,6 +178,14 @@ en este capítulo.
   combinar el libro local con las referencias externas.
 \end{enumerate}
 
+En conjunto, estas cuatro observaciones no son anecdóticas: determinan decisiones concretas
+del resto del trabajo. El desequilibrio de clases fija la elección de métricas; la calidad de
+los datos y su escasez efectiva imponen la regularización agresiva y la prudencia en la
+validación; el patrón \emph{prestart} define la ventana del especialista; y el acoplamiento
+con Bitcoin justifica el bloque de características externas. Es decir, el diseño metodológico
+de los apartados siguientes se deriva directamente de lo que muestran los datos, y no de
+elecciones arbitrarias.
+
 \section{Resultados en modelos baseline}
 
 Antes de introducir cualquier modelo complejo conviene establecer una línea base sencilla y
@@ -187,13 +195,16 @@ introducir la latencia; este resultado es la observación que reorienta todo el 
 
 \subsection{Línea base tabular y el impacto de la latencia}
 
-Una línea base tabular sobre el horizonte corto (16 segundos) alcanza una precisión
-direccional cercana al 90\,\% y supera la validación temporal por bloques. Evaluada solo
-con métricas de clasificación, parece un modelo excelente. El problema aparece al introducir
-la entrada retrasada y el coste. La Tabla~\ref{tab:latencia} y la Figura~\ref{fig:latencia}
-muestran el rendimiento en el test terminal —el bloque no utilizado para seleccionar la
-política— en función de la latencia de entrada, en un escenario conservador con filtro de
-\emph{spread}.
+La línea base son modelos sobrios y bien entendidos —una regresión logística balanceada y un
+\emph{gradient boosting} pequeño, también balanceado— sobre el conjunto de características
+descrito antes, con la etiqueta direccional a un horizonte corto (16 segundos). Se entrena por
+\emph{token-frame} y se evalúa por \emph{market-frame}, para no contar dos veces el mismo
+instante del mercado. Esta línea base alcanza una precisión direccional cercana al 90\,\% y
+supera la validación temporal por bloques. Evaluada solo con métricas de clasificación, parece
+un modelo excelente. El problema aparece al introducir la entrada retrasada y el coste. La
+Tabla~\ref{tab:latencia} y la Figura~\ref{fig:latencia} muestran el rendimiento en el test
+terminal —el bloque no utilizado para seleccionar la política— en función de la latencia de
+entrada, en un escenario conservador con filtro de \emph{spread}.
 
 \begin{table}[h]
 \centering
@@ -219,6 +230,17 @@ nula es real como \emph{markout} desde el instante de la señal, pero no sobrevi
 política ejecutable con dos segundos de latencia.}
 \label{fig:latencia}
 \end{figure}
+
+La lectura de la tabla es contundente. A latencia nula la política sería extraordinaria
+($+6{,}79$ ticks de media, con un 92\,\% de acierto en las operaciones de subida), porque mide
+el \emph{markout} desde el instante exacto de la señal. Pero a dos segundos —el primer
+escalón realista— el acierto se desploma al 39,7\,\% y el neto pasa a $-1{,}48$ ticks: la
+oportunidad ya se ha consumido cuando la orden podría ejecutarse. Es revelador que a 4 y 8
+segundos el neto \emph{mejore} ligeramente (hacia $-0{,}74$ y $-0{,}30$): no es que operar más
+tarde sea mejor, sino que a esas latencias el modelo ya ni siquiera detecta la señal efímera
+que lo hacía perder, de modo que sus decisiones se vuelven casi aleatorias y el daño se
+diluye. En otras palabras, toda la ventaja vivía en una ventana de pocos segundos que la
+latencia hace inaccesible.
 
 Este es el resultado que vertebra todo el trabajo: \textbf{acertar la dirección no equivale
 a obtener beneficio}. Con una latencia realista de dos segundos, el neto medio del test
@@ -293,15 +315,54 @@ cuartil de un grupo de operaciones comparables (mismo bloque temporal, fase, niv
 deliberada: una operación puede tener alto valor esperado pero baja probabilidad de relleno
 sano si el libro está degradado.
 
+\subsection{Ingeniería de características}
+
+El especialista recibe un vector de 36 características, todas calculadas exclusivamente con
+información disponible hasta el instante $t$. Se agrupan en cuatro bloques con una
+justificación clara para cada uno:
+
+\begin{description}[noitemsep, leftmargin=2.8cm, font=\bfseries]
+\item[Estado del libro] Resúmenes del libro de órdenes de Polymarket: precio medio,
+\emph{spread}, \emph{microprice} (precio ponderado por volumen, que anticipa la presión de
+compra-venta), desbalance entre niveles, coste visible de entrada y cambios recientes del
+precio. Describen el estado local del mercado.
+\item[Referencias externas] Retornos orientados del mercado al contado y de los futuros
+perpetuos a 2 y 8 segundos, junto con medidas de consenso y de actualización. Capturan el
+acoplamiento con Bitcoin, que el análisis exploratorio mostró relevante a escala de segundos.
+\item[Volatilidad] La volatilidad realizada del perpetuo a 5 segundos, que además gobierna el
+filtro de volatilidad.
+\item[Contexto de ventana] Posición dentro de la ventana \emph{prestart} y \emph{proxies} de
+calidad del libro (cobertura e indicadores de degradación), que informan de la ejecutabilidad.
+\end{description}
+
+Una decisión deliberada es excluir las variables de reloj (hora, minuto, segundo): el
+conjunto se denomina por ello \emph{no\_clock}. El motivo es evitar que el modelo aprenda
+atajos temporales triviales —por ejemplo, asociar la señal a un instante concreto del día—
+que no generalizarían y que, en la práctica, son una forma sutil de sobreajuste. El inventario
+completo se recoge en el Anexo~\ref{anexo:features}.
+
 \subsection{Validación temporal y prevención de fuga}
 
-La partición respeta siempre el orden del tiempo: el entrenamiento utiliza las sesiones más
-antiguas, la validación las posteriores y el test terminal el bloque final. En los
-experimentos secuenciales se emplea además un protocolo fuera de pliegue
-(\emph{out-of-fold}): cada modelo se entrena solo con días anteriores, las predicciones que
-consume una segunda etapa son siempre fuera de muestra, y la política de decisión se
-selecciona sin observar el test terminal. Esta disciplina contra la fuga temporal es la
-salvaguarda frente a resultados ilusorios~\cite{lopezdeprado2018,gu2020empirical}.
+Una partición aleatoria por filas, habitual en problemas sin estructura temporal, sería aquí
+un error grave: las observaciones contiguas están autocorrelacionadas y un mismo mercado
+puede aparecer a ambos lados del corte, de modo que el modelo acabaría ``viendo el futuro''.
+Por ello la partición respeta siempre el orden del tiempo: el entrenamiento utiliza las
+sesiones más antiguas, la validación las posteriores y el test terminal el bloque final, que
+permanece sellado hasta el final del proceso.
+
+En los experimentos secuenciales se refuerza esta disciplina con un protocolo fuera de
+pliegue (\emph{out-of-fold}) de tipo \emph{walk-forward} expansivo: el conjunto de
+entrenamiento crece hacia delante en el tiempo y, en cada pliegue, las predicciones que
+consume una segunda etapa proceden siempre de un modelo que no las entrenó. A ello se añaden
+dos protecciones en las fronteras entre bloques. La \emph{purga} retira del entrenamiento las
+observaciones cuyo horizonte de etiqueta se solapa con el bloque que se está evaluando, ya
+que de lo contrario una etiqueta calculada con datos del bloque evaluado contaminaría el
+ajuste. El \emph{embargo} descarta además un pequeño margen temporal alrededor de cada
+frontera, para que el solape de las secuencias históricas tampoco introduzca fuga. La
+política de decisión se selecciona únicamente sobre la validación, sin observar en ningún
+momento el test terminal. Esta disciplina contra la fuga temporal es la principal salvaguarda
+frente a los resultados ilusorios que la literatura describe de forma
+reiterada~\cite{lopezdeprado2018,gu2020empirical}.
 
 \subsection{Modelo de costes y latencia}
 
@@ -368,27 +429,43 @@ si no lo hace, se descarta.}
 \label{fig:escalera}
 \end{figure}
 
-Los \textbf{modelos sensibles a la latencia} incorporan la latencia en el etiquetado y la
-selección; uno de ellos alcanza un AUC de test de 0,79 y, pese a ello, su política económica
-sigue siendo negativa. Sobre el \textbf{libro de órdenes} se construyen secuencias de ocho
-pasos y un tensor de los diez primeros niveles, y se evalúan una red recurrente (GRU, capa
-oculta de dimensión 56), un codificador convolucional del libro (\emph{BookEncoder}, dos
-capas Conv1D con \emph{pooling} medio y máximo, inspirado en
-DeepLOB~\cite{zhang2019deeplob,tsantekidis2017}), una fusión de ambos y una red convolucional
-temporal (TCN) para el régimen de volatilidad. El \emph{BookEncoder} resume cada fotografía
-del libro con dos convoluciones unidimensionales sobre la dimensión de niveles y un
-\emph{pooling} dual (medio y máximo):
+\paragraph{Modelos sensibles a la latencia.} El primer salto sobre el baseline consiste en
+incorporar la latencia ya en el etiquetado y en la selección, de modo que el modelo aprenda a
+elegir operaciones que sigan siendo rentables \emph{tras} el retardo de entrada. Uno de estos
+modelos alcanza un AUC de test de 0,79 —una capacidad de clasificación notable— y, sin
+embargo, su política económica sigue siendo negativa. La conclusión refuerza la lección
+central: más capacidad de clasificación no implica una política rentable.
+
+\paragraph{Modelos secuenciales y sobre el libro de órdenes.} El siguiente nivel trata el
+libro como un objeto con estructura espacio-temporal. Se construyen secuencias de ocho
+fotografías consecutivas y un tensor de los diez primeros niveles del libro, y sobre esa
+representación se evalúan cuatro arquitecturas:
+\begin{itemize}[noitemsep]
+\item una red recurrente \textbf{GRU} (capa oculta de dimensión 56) sobre la secuencia de
+características, que modela la dinámica temporal reciente;
+\item un codificador convolucional del libro, el \textbf{BookEncoder}, inspirado en
+DeepLOB~\cite{zhang2019deeplob,tsantekidis2017}, que resume cada fotografía con dos
+convoluciones unidimensionales sobre la dimensión de niveles y un \emph{pooling} dual,
 \begin{equation}
 \mathbf{h} = \big[\operatorname{mean}_\tau\, \phi(\mathbf{B}_\tau)\ \|\ \operatorname{max}_\tau\, \phi(\mathbf{B}_\tau)\big],
 \quad
 \phi = \text{ReLU}\!\circ\!\text{Conv1d}\!\circ\!\text{Dropout}\!\circ\!\text{ReLU}\!\circ\!\text{Conv1d},
 \end{equation}
-donde $\mathbf{B}_\tau$ es el libro en el paso $\tau$ de la secuencia y $\|$ denota
-concatenación. El \emph{pooling} máximo capta los picos de profundidad, a menudo más
-informativos que la media en mercados poco líquidos. Estas arquitecturas aprenden
-representación, pero no producen una política estable con un horizonte de entrenamiento de
-unas dos semanas (unos 5\,800 ejemplos): el aprendizaje profundo se aparca a la espera de
-más datos.
+donde $\mathbf{B}_\tau$ es el libro en el paso $\tau$ y $\|$ denota concatenación; el
+\emph{pooling} máximo capta los picos de profundidad, a menudo más informativos que la media
+en mercados poco líquidos;
+\item una \textbf{fusión} que combina la salida de la GRU y la del BookEncoder en una cabeza
+común, para aprovechar simultáneamente la dinámica temporal y la estructura del libro;
+\item una red convolucional temporal (\textbf{TCN}) orientada a clasificar el régimen de
+volatilidad de la sesión.
+\end{itemize}
+Todas estas arquitecturas aprenden representación —obtienen métricas de clasificación y de
+ordenación razonables, y algunas políticas \emph{proxy} resultan positivas dentro de
+muestra—, pero ninguna produce una política rentable y estable cuando se exige selección
+causal día a día y estabilidad en todo el bloque de test. Con un horizonte de entrenamiento
+de unas dos semanas (unos 5\,800 ejemplos) la varianza de estos modelos es demasiado alta:
+memorizan el periodo de entrenamiento y no generalizan al siguiente. Por eso el aprendizaje
+profundo se aparca a la espera de un volumen de datos sustancialmente mayor.
 
 Durante la auditoría se detectó y corrigió un error de interpretación en el \emph{score} de
 selección adversa (su orientación correcta es $1 - P(\text{adverso})$), lo que ilustra que

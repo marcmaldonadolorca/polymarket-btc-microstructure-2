@@ -5,8 +5,11 @@
 % Packages
 % --------------------------
 \usepackage[spanish,english,es-tabla,es-noshorthands]{babel}  % es-noshorthands: evita que < > " activen atajos (conflicto con TikZ)
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}   % solo pdfLaTeX: XeTeX/LuaTeX (tectonic) ya leen UTF-8 nativo
+  \usepackage[T1]{fontenc}      % cargar inputenc bajo XeTeX corrompe ¿ ¡ — por eso se condiciona
+\fi
 \usepackage{lmodern}     % Use a modern font (that is not pixelated)
 \usepackage[protrusion=true, expansion=false]{microtype}  % expansion=false: compatible con XeTeX/tectonic
 \usepackage{amsmath,amssymb} 

@@ -3,32 +3,56 @@
 \chapter{Aspectos éticos y limitaciones}
 \label{ch::etica}
 
+Este capítulo recoge las consideraciones éticas que han guiado el trabajo y, a continuación,
+una revisión honesta de sus limitaciones, que son tan importantes como los resultados.
+
 \section{Consideraciones éticas}
 
 El sistema toma decisiones económicas de forma automatizada y es especialmente sensible al
-sobreajuste cuando el horizonte de datos es reducido. Por ello el trabajo se detiene
-deliberadamente en la fase de \emph{paper-shadow} y no opera con capital real. Se adopta un
-marco de confidencialidad, integridad y disponibilidad, y se trata la integridad de los
-datos como algo tan crítico como el propio modelo: una referencia externa retrasada o errónea
-puede inducir una señal espuria y, con ella, una pérdida. En consecuencia, el sistema se
-entrena únicamente con sesiones aceptadas, separa los datos crudos de las características y las
-etiquetas, mantiene trazabilidad de los artefactos y define umbrales para inhibir la operativa
-ante datos obsoletos. El trabajo no emplea datos personales: utiliza exclusivamente datos
-públicos de mercado.
+sobreajuste cuando el horizonte de datos es reducido. Esa combinación —automatización y
+fragilidad estadística— es la que justifica la decisión más importante del trabajo desde el
+punto de vista ético: detenerse deliberadamente en la fase de \emph{paper-shadow} y no operar
+con capital real. Desplegar una política frágil podría producir pérdidas reales y, en
+agregado, contribuir a una dinámica de mercado indeseada; mientras la evidencia sea de cinco
+días, la actuación responsable es no operar.
+
+En cuanto al tratamiento de los datos, se adopta un marco de confidencialidad, integridad y
+disponibilidad. La integridad se trata como algo tan crítico como el propio modelo: una
+referencia externa retrasada o errónea puede inducir una señal espuria y, con ella, una
+pérdida. En consecuencia, el sistema se entrena únicamente con sesiones aceptadas por el
+control de calidad, separa los datos crudos de las características y las etiquetas, mantiene
+trazabilidad de los artefactos y define umbrales para inhibir la operativa ante datos
+obsoletos. El trabajo no emplea datos personales: utiliza exclusivamente datos públicos de
+mercado. Por último, la herramienta de captura se mantiene privada por prudencia, mientras
+que el código de análisis, el esquema de datos y una muestra se publican para favorecer la
+reproducibilidad sin comprometer esa cautela.
 
 \section{Limitaciones}
 
-La limitación principal es el soporte temporal del conjunto fuera de muestra: cinco días.
-Aunque el intervalo de confianza es estrecho y los cinco días son positivos, cinco días no
-constituyen una validación definitiva, y así se reporta. El resultado es además específico de
-la ventana \emph{prestart} y del régimen capturado; un cambio de régimen suficientemente
-grande podría invalidar el filtro de volatilidad, como ilustra el propio desplazamiento
-observado entre el entrenamiento y el conjunto fuera de muestra. Por último, la validación es
-\emph{offline}, bajo un modelo de ejecución conservador pero simplificado; una validación con
-ejecución simulada de mayor fidelidad —que incorpore rellenos parciales y dinámica de
-cola— queda como trabajo pendiente.
+Conviene enumerar las limitaciones de forma explícita, porque delimitan el alcance de las
+conclusiones.
 
-Se observa, además, un patrón en forma de U entre la volatilidad y el beneficio dentro del
-intervalo habilitado por el filtro, en el que la volatilidad muy baja concentra la mayor
-parte del beneficio. Dado que descansa sobre los mismos cinco días, se deja como hipótesis a
-comprobar y no como resultado.
+\textbf{Soporte temporal.} Es la limitación principal: el conjunto fuera de muestra son cinco
+días. Aunque el intervalo de confianza es estrecho y los cinco días son positivos, cinco días
+no constituyen una validación definitiva, y así se reporta en cada cifra. Por eso el candidato
+queda en estado \emph{prometedor pero con datos insuficientes} y no se afirma rentabilidad.
+
+\textbf{Especificidad del resultado.} El resultado es específico de la ventana \emph{prestart}
+y del régimen capturado. Un cambio de régimen suficientemente grande podría invalidar el
+filtro de volatilidad; el propio desplazamiento observado entre el entrenamiento y el conjunto
+fuera de muestra demuestra que estos cambios ocurren y que el modelo es sensible a ellos.
+
+\textbf{Estimación de la incertidumbre.} El intervalo de confianza se obtiene por
+\emph{bootstrap} sobre las operaciones. Si existe correlación entre operaciones del mismo día,
+este procedimiento puede subestimar la incertidumbre real; por ello no se interpreta el
+intervalo de forma aislada, sino junto al número de días positivos y al soporte. Un
+\emph{bootstrap} por bloques diarios, más conservador, es una mejora pendiente.
+
+\textbf{Validación \emph{offline}.} La evaluación es \emph{offline}, bajo un modelo de
+ejecución conservador pero simplificado. Una validación con ejecución simulada de mayor
+fidelidad —que incorpore rellenos parciales y dinámica de cola— queda como trabajo pendiente.
+
+\textbf{Patrón en U (hipótesis).} Dentro del intervalo habilitado por el filtro se observa un
+patrón en forma de U entre la volatilidad y el beneficio, en el que la volatilidad muy baja
+concentra la mayor parte del beneficio. Como descansa sobre los mismos cinco días, se deja
+como hipótesis a comprobar y no como resultado.
