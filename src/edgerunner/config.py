@@ -21,7 +21,9 @@ FROZEN_POLICY_PATH = CONFIG_DIR / "frozen_policy_thresholds.yaml"
 class FrozenPolicy:
     """Umbrales congelados del especialista prestart H60 + vol gate.
 
-    Se fijaron antes de ver los datos fresh (6-10 jun 2026) y no se retocan.
+    Los umbrales EV/HP se fijaron antes del bloque fresh. El vol gate se
+    incorporó tras diagnosticar el bloque 6-10 jun 2026 y queda congelado para
+    observaciones posteriores.
     Reflejan ``config/frozen_policy_thresholds.yaml`` y los scripts del arco.
     """
 

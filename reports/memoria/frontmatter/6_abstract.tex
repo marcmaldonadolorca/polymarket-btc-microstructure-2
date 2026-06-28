@@ -18,13 +18,16 @@ classifier that is correct nearly nine out of ten times stops being profitable o
 realistic two-second entry latency is introduced: what decides the outcome is cost and
 execution, not directional accuracy. Building on this, we evaluate a progression of models
 (tabular baselines, latency-aware models, and sequential and convolutional architectures
-over the order book) and a frozen tabular specialist combined with a volatility filter.
-This candidate survives a five-day out-of-sample validation under cost, reaching a positive
-net result per trade with a narrow bootstrap confidence interval and five out of five
-positive days. We report every figure in net ticks together with its support and
-uncertainty, and we do not claim real profitability: the deliverable is the methodology,
-the evidence obtained under an honest protocol, and the explicit delimitation of its
-limits.
+over the order book) and a frozen tabular specialist. On the untouched five-day
+out-of-sample block, the specialist obtains a modest positive mean at the reference cost
+(+0.349 ticks per action, 754 actions and three out of five positive days), but turns
+slightly negative under the full-cost stress test. A volatility filter, whose numerical
+threshold came from the training period, is then explored after detecting a regime shift;
+it improves the result on the same block, so it is reported as a post-hoc diagnostic rather
+than as confirmatory evidence. We report every figure in net ticks together with its support
+and uncertainty, and we do not claim real profitability: the deliverable is the
+methodology, the evidence obtained under an auditable protocol, and the explicit
+delimitation of its limits.
 
 \newpage
 \section*{Resumen}
@@ -46,9 +49,13 @@ deja de ser rentable en cuanto se introduce una latencia de entrada realista de 
 segundos: lo que decide el resultado es el coste y la ejecución, no el acierto direccional.
 A partir de ahí se evalúa una progresión de modelos (líneas base tabulares, modelos
 sensibles a la latencia y arquitecturas secuenciales y convolucionales sobre el libro de
-órdenes) y un especialista tabular congelado combinado con un filtro de volatilidad. Ese
-candidato sobrevive a una validación fuera de muestra de cinco días bajo coste, con un neto
-positivo por operación, un intervalo de confianza bootstrap estrecho y cinco de cinco días
-positivos. Todos los resultados se reportan en ticks netos junto a su soporte e
-incertidumbre, y no se afirma rentabilidad real: lo que se entrega es la metodología, la
-evidencia obtenida bajo un protocolo honesto y la delimitación explícita de sus límites.
+órdenes) y un especialista tabular congelado. En el bloque intacto de cinco días fuera de
+muestra, el especialista obtiene un promedio modestamente positivo al coste de referencia
+($+0{,}349$ ticks por acción, 754 acciones y tres de cinco días positivos), pero pasa a ser
+ligeramente negativo bajo el coste de estrés completo. Tras detectar un cambio de régimen se
+explora un filtro de volatilidad cuyo umbral numérico procede del entrenamiento; como la
+decisión de incorporarlo se evalúa sobre ese mismo bloque, su mejora se presenta como
+diagnóstico \emph{post-hoc}, no como evidencia confirmatoria. Todos los resultados se reportan
+en ticks netos junto a su soporte e incertidumbre, y no se afirma rentabilidad real: lo que
+se entrega es la metodología, la evidencia obtenida bajo un protocolo auditable y la
+delimitación explícita de sus límites.

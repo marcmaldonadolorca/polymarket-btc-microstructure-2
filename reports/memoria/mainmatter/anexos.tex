@@ -40,8 +40,9 @@ características; principal fuente de resultados ilusorios.
 \item[Congelación] Fijar el modelo y los umbrales antes de observar el conjunto fuera de muestra.
 \item[Drawdown] Mayor caída acumulada desde un máximo previo.
 \item[\emph{Bootstrap}] Remuestreo con reemplazo para estimar la incertidumbre de un resultado.
-\item[Paper-shadow] Seguimiento en sombra: se registra lo que la política habría hecho, sin
-arriesgar capital.
+\item[Registro de sombra] Contabilidad de lo que la política habría indicado sin arriesgar
+capital. Puede ser retrospectivo (replay \emph{offline}) o prospectivo; solo el segundo aporta
+nuevos días de validación.
 \item[Gradient boosting] Familia de modelos que suma muchos árboles de decisión, cada uno
 corrigiendo los errores del anterior.
 \end{description}
@@ -57,8 +58,8 @@ El especialista final emplea 36 características causales sin variables de reloj
 desbalance de órdenes, coste visible de entrada y deltas recientes del precio.
 \item \textbf{Referencias externas:} retornos orientados del mercado al contado y de los
 futuros perpetuos a 2 y 8 segundos; medidas de consenso y de actualización.
-\item \textbf{Volatilidad:} volatilidad realizada del perpetuo a 5 segundos (también usada por
-el filtro de volatilidad).
+\item \textbf{Volatilidad:} volatilidad realizada del perpetuo a 5 segundos, usada en el
+diagnóstico posterior de cambio de régimen.
 \item \textbf{Contexto de ventana:} fase de la ventana \emph{prestart} y proxies de calidad del
 libro (cobertura, indicadores de degradación).
 \end{itemize}
@@ -104,8 +105,8 @@ Dimensión oculta de la GRU & 56 \\
 \end{tabular}
 \end{table}
 
-La política congelada opera con dos umbrales: valor esperado predicho superior a 0,75 y
-probabilidad de salud no inferior a 0,50. El filtro de volatilidad habilita la operativa cuando
-la volatilidad realizada a 5 segundos no supera 0,6657 (percentil 80 de la volatilidad de
-entrenamiento). El intervalo de confianza se estima por \emph{bootstrap} con 5\,000 remuestreos
-y semilla fija.
+El especialista base congelado opera con dos umbrales: valor esperado predicho superior a
+0,75 y probabilidad de salud no inferior a 0,50. Tras el diagnóstico del bloque fuera de
+muestra se propone una política futura que exige, además, volatilidad realizada a 5 segundos
+no superior a 0,6657 (percentil 80 del entrenamiento). La incertidumbre exploratoria se
+estima con 5\,000 remuestreos y semilla fija, tanto por filas como agrupando por mercado.

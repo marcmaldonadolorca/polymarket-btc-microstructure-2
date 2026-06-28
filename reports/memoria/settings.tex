@@ -30,7 +30,7 @@
 \usepackage{blindtext}
 \usepackage[acronym,nonumberlist,nomain]{glossaries}  % package for list of acronyms
 \usepackage{hyperref}
-\usepackage[a4paper]{geometry}
+\usepackage{geometry}
 \usepackage{parskip}     % paragraph spacing (suppress indentation)
 \usepackage{fancyhdr}    % personalizar encabezado
 \usepackage{enumitem}
@@ -63,8 +63,9 @@
 % --------------------------
 % Customize document
 % --------------------------
-% Define the geometry of the document
-\newgeometry {top=2.5cm, bottom=2.5cm, right=2.5cm, left=2.5cm}
+% Define the geometry and the physical page size.  \newgeometry would reset the
+% paper stock to the engine default (US Letter), so the setting belongs here.
+\geometry{a4paper, top=2.5cm, bottom=2.5cm, right=2.5cm, left=2.5cm}
 
 \setlength{\parskip}{10pt}   % Change the default value
 
@@ -79,9 +80,8 @@
 % Header and footer
 \fancyhf{}   % Clear the default header and footer
 \renewcommand{\headrulewidth}{0.2pt}
- 
-\fancyhead[RO]{\nouppercase \leftmark}  % Define the header for odd and even pages
-\fancyhead[LE]{\thesisAuthor}           % Define the header for odd and even pages
+\setlength{\headheight}{14.5pt}
+\fancyhead[R]{\nouppercase{\leftmark}}
 \fancyfoot[C]{\thepage}
 
 \addto\captionsspanish{\renewcommand{\contentsname}{Tabla de Contenido}}
@@ -91,4 +91,3 @@
 % Increase indentation in lists
 \newlist{mydescription}{description}{1}
 \setlist[mydescription,1]{labelindent=2em, leftmargin=2em}
-

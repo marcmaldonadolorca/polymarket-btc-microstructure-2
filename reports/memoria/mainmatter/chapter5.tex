@@ -3,64 +3,56 @@
 \chapter{Despliegue}
 \label{ch::despliegue}
 
-Este capítulo, opcional en la plantilla, documenta la \emph{estrategia} de despliegue. La
-decisión más importante es deliberada y se explica a continuación: el sistema \textbf{no se
-despliega} con capital real, sino que se detiene en una fase de seguimiento en sombra
-(\emph{paper-shadow}).
+Este capítulo documenta la estrategia de despliegue y, sobre todo, la decisión de no operar
+con capital real. El especialista base ofrece una señal fuera de muestra modesta, mientras
+que la mejora del filtro de volatilidad procede de un análisis \emph{post-hoc}. El siguiente
+paso válido no es producción, sino una sombra prospectiva con la política ya congelada.
 
-\section{Estrategia de despliegue y seguimiento en paper-shadow}
-
-Esta sección justifica la decisión de no desplegar el sistema en producción, describe la
-infraestructura de seguimiento en sombra que se utiliza en su lugar y esboza qué requeriría
-un despliegue futuro. La decisión de detenerse es coherente con la prudencia metodológica que
-guía todo el trabajo.
+\section{Estrategia de despliegue y seguimiento en sombra}
 
 \subsection{Por qué no se despliega}
 
-Desplegar una política de decisión económica con cinco días de soporte fuera de muestra
-sería metodológicamente imprudente, por mucho que el intervalo de confianza sea estrecho y
-los cinco días positivos. Cinco días no constituyen una validación definitiva, y un sistema
-que opera con capital real es especialmente sensible al sobreajuste cuando el horizonte de
-datos es reducido. Por coherencia con la tesis del trabajo —que la honestidad del protocolo
-prevalece sobre cualquier número concreto— el proyecto se detiene antes de operar.
+El resultado limpio se apoya en cinco días, solo tres son positivos y el neto pasa a ser
+ligeramente negativo bajo el coste completo. El subconjunto de baja volatilidad es más
+prometedor, pero se identificó usando esos mismos cinco días. Desplegar en estas condiciones
+confundiría una hipótesis razonable con una validación. Por coherencia con la tesis del
+trabajo ---la honestidad del protocolo prevalece sobre cualquier número concreto--- el
+proyecto se detiene antes de operar.
 
-\subsection{Seguimiento \emph{paper-shadow}}
+\subsection{Del registro retrospectivo a la sombra prospectiva}
 
-En su lugar, el sistema se mantiene en \emph{paper-shadow}: se registra, operación a
-operación, lo que la política \emph{habría} hecho, sin arriesgar capital. Esta
-infraestructura produce una contabilidad detallada, un resumen diario y, sobre todo, una
-puerta de decisión cuantitativa que determina cuándo —si alguna vez— tendría sentido pasar a
-una fase superior. Las reglas de promoción son deliberadamente conservadoras y exigen
-soporte temporal, no solo neto positivo:
+El registro disponible es \emph{offline} y retrospectivo: reconstruye, unidad de acción a
+unidad de acción, qué habría indicado la regla de baja volatilidad sobre el bloque ya
+observado. Sirve para comprobar la contabilidad, el resumen diario y las guardas, pero esos
+cinco días no cuentan como validación de la política completa.
+
+A partir del cierre del bloque se congela la regla candidata
+($\text{volatilidad}_{5s}\leq0{,}6657$, EV $>0{,}75$ y probabilidad de salud
+$\geq0{,}50$). Una sombra prospectiva deberá ejecutarla sin cambios sobre fechas posteriores,
+registrar también las abstenciones y resolver la exposición simultánea por mercado. Solo esa
+evidencia podrá alimentar las puertas de promoción:
 
 \begin{itemize}[noitemsep]
-  \item \textbf{Candidato a paper-shadow:} neto superior a 0,5 ticks, al menos 200
-  operaciones y al menos 8 días de soporte.
-  \item \textbf{Candidato a despliegue:} neto superior a 0,5 ticks, al menos 400 operaciones
-  y al menos 12 días de soporte.
+  \item \textbf{Candidato a seguimiento ampliado:} neto superior a 0,5 ticks, al menos 200
+  unidades de acción y al menos 8 días prospectivos.
+  \item \textbf{Candidato a despliegue:} neto superior a 0,5 ticks, al menos 400 unidades,
+  12 días prospectivos y una regla de exposición/fill validada.
 \end{itemize}
 
-Con los datos actuales (318 operaciones, 5 días), el candidato no alcanza el primer umbral
-por falta de días, y queda explícitamente en estado \emph{prometedor pero con datos
-insuficientes}.
+En la fecha de corte hay cero días prospectivos de la política completa. Su estado correcto
+es \emph{hipótesis congelada pendiente de validación}, no candidata a bot.
 
 \subsection{Diseño de una hipotética API de inferencia}
 
-A título de trabajo futuro, y solo si se superasen las puertas de promoción anteriores, un
-despliegue eventual tomaría la forma de un servicio de inferencia con cuatro etapas
-encadenadas. Primero, una etapa de ingesta que reconstruyese en tiempo real el estado del
-mercado sobre la malla de dos segundos a partir de las mismas fuentes de captura. Segundo,
-una etapa de cálculo que generase las 36 características causales del instante actual,
-idéntica a la del entrenamiento para evitar discrepancias entre entrenamiento y producción
+Solo si se superasen las puertas anteriores, un despliegue eventual tomaría la forma de un
+servicio de inferencia con cuatro etapas. Primero, una etapa de ingesta que reconstruyese en
+tiempo real el estado del mercado sobre la malla de dos segundos. Segundo, una etapa de
+cálculo que generase las 36 características causales del instante actual, idéntica a la del
+entrenamiento para evitar discrepancias entre entrenamiento y producción
 (\emph{train/serve skew}). Tercero, una etapa de decisión que consultase las dos cabezas del
-especialista y devolviese una recomendación (operar o no) junto con el valor esperado y la
-probabilidad de salud. Y cuarto, una capa de guardas que aplicase, antes de cualquier
-recomendación, los filtros estrictos de entorno, el filtro de volatilidad y un mecanismo de
-inhibición que cortase la operativa ante datos obsoletos o degradados.
+especialista y devolviese operar o abstenerse. Y cuarto, una capa de guardas que aplicase los
+filtros de entorno, volatilidad y obsolescencia, además del límite de exposición por mercado.
 
-Por encima de ese servicio operaría una capa de monitorización que vigilase la deriva de
-distribución (especialmente el régimen de volatilidad), registrase cada decisión para
-auditoría y dispusiese de un interruptor de parada inmediata. Conviene insistir en que esta
-arquitectura es un \emph{diseño}, no una implementación: su desarrollo solo tendría sentido
-tras acumular el soporte temporal que hoy falta, y siempre manteniendo el principio de
-detenerse ante cualquier señal de degradación.
+Por encima operaría una capa de monitorización que vigilase la deriva de distribución,
+registrase cada decisión para auditoría y dispusiese de un interruptor de parada inmediata.
+Esta arquitectura es un diseño, no una implementación.

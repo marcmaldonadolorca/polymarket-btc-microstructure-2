@@ -34,6 +34,7 @@ alinean en el tiempo sobre una malla regular de dos segundos, como se detalla a 
 
 \begin{figure}[h]
 \centering
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
   node distance=6mm and 14mm,
   src/.style={draw, rounded corners, fill=blue!6, align=center, minimum width=26mm, minimum height=8mm, font=\small},
@@ -54,6 +55,7 @@ alinean en el tiempo sobre una malla regular de dos segundos, como se detalla a 
 \draw[-{Latex}] (align) -- (qa);
 \draw[-{Latex}] (qa) -- (corp);
 \end{tikzpicture}
+}
 \caption{Arquitectura del sistema de captura. Las cuatro fuentes se alinean sobre una malla
 de dos segundos, pasan un control de calidad por sesión y forman el corpus.}
 \label{fig:captura}
@@ -286,6 +288,7 @@ es favorable (Figura~\ref{fig:doscabezas}).
 
 \begin{figure}[h]
 \centering
+\resizebox{0.97\textwidth}{!}{%
 \begin{tikzpicture}[
   node distance=5mm and 12mm, font=\small, >=Latex,
   io/.style={draw, rounded corners, fill=blue!6, align=center, minimum width=30mm, minimum height=9mm},
@@ -301,6 +304,7 @@ es favorable (Figura~\ref{fig:doscabezas}).
 \draw[-{Latex}] (reg.east) -- (pol.west);
 \draw[-{Latex}] (clf.east) -- (pol.west);
 \end{tikzpicture}
+}
 \caption{Modelo de dos cabezas. Un regresor predice el valor esperado de la operación y un
 clasificador predice si el relleno será ``sano''. La política exige ambas condiciones.}
 \label{fig:doscabezas}
@@ -329,8 +333,8 @@ precio. Describen el estado local del mercado.
 \item[Referencias externas] Retornos orientados del mercado al contado y de los futuros
 perpetuos a 2 y 8 segundos, junto con medidas de consenso y de actualización. Capturan el
 acoplamiento con Bitcoin, que el análisis exploratorio mostró relevante a escala de segundos.
-\item[Volatilidad] La volatilidad realizada del perpetuo a 5 segundos, que además gobierna el
-filtro de volatilidad.
+\item[Volatilidad] La volatilidad realizada del perpetuo a 5 segundos, empleada posteriormente
+en el diagnóstico de cambio de régimen.
 \item[Contexto de ventana] Posición dentro de la ventana \emph{prestart} y \emph{proxies} de
 calidad del libro (cobertura e indicadores de degradación), que informan de la ejecutabilidad.
 \end{description}
@@ -413,6 +417,7 @@ bajo el mismo protocolo de costes y validación (Figura~\ref{fig:escalera}).
 
 \begin{figure}[h]
 \centering
+\resizebox{0.97\textwidth}{!}{%
 \begin{tikzpicture}[
   node distance=4mm, font=\small, >=Latex,
   rung/.style={draw, rounded corners, align=center, minimum width=0.84\textwidth, minimum height=8mm, inner sep=3pt},
@@ -421,9 +426,10 @@ bajo el mismo protocolo de costes y validación (Figura~\ref{fig:escalera}).
 \node[rung, fill=blue!6, below=of s1] (s2) {Modelos sensibles a la latencia (AUC 0,79; política negativa)};
 \node[rung, fill=blue!8, below=of s2] (s3) {Secuencias y libro: GRU, Conv1D (\emph{BookEncoder}), fusión, TCN (representación sí, política no)};
 \node[rung, fill=orange!10, below=of s3] (s4) {Corrección del \emph{score} de selección adversa; selección de horizonte (H60)};
-\node[rung, fill=green!12, thick, below=of s4] (s5) {Especialista \emph{prestart} H60 (HGB de dos cabezas) + filtro de volatilidad};
+\node[rung, fill=green!12, thick, below=of s4] (s5) {Especialista \emph{prestart} H60 (HGB de dos cabezas) + diagnóstico de régimen};
 \draw[-{Latex}] (s1)--(s2); \draw[-{Latex}] (s2)--(s3); \draw[-{Latex}] (s3)--(s4); \draw[-{Latex}] (s4)--(s5);
 \end{tikzpicture}
+}
 \caption{La escalera de modelos. Cada paso debe superar al anterior bajo el mismo protocolo;
 si no lo hace, se descarta.}
 \label{fig:escalera}
@@ -522,20 +528,22 @@ seleccionaron sobre el conjunto de validación, nunca sobre el test terminal.
 
 \subsection{Filtro de volatilidad}
 
-Al preparar la validación fuera de muestra se observó un cambio de régimen: la fracción de
-sesiones de alta volatilidad pasó de un 18--22\,\% en entrenamiento a alrededor del 58\,\% en
-el conjunto fuera de muestra (véase la Figura~\ref{fig:regimen} del
-Capítulo~\ref{ch::resultados}). Como el modelo aprendió en un régimen de baja volatilidad y
-sus predicciones en alta volatilidad no son fiables bajo la distribución desplazada, se
-introduce un filtro simple que solo habilita la operativa cuando la volatilidad realizada a
-cinco segundos no supera el umbral 0,6657, correspondiente al percentil 80 de la volatilidad
-de entrenamiento (un umbral fijado con los datos antiguos, no ajustado a los nuevos).
+Al inspeccionar el bloque fuera de muestra se observó un cambio de régimen: la fracción de
+sesiones de alta volatilidad pasó de un 18--22\,\% en entrenamiento a alrededor del 58\,\%
+(véase la Figura~\ref{fig:regimen} del Capítulo~\ref{ch::resultados}). Como diagnóstico se
+separaron las acciones usando el umbral 0,6657, correspondiente al percentil 80 de la
+volatilidad de entrenamiento. El valor numérico procede, por tanto, de datos antiguos; sin
+embargo, la decisión de incorporar este filtro a la política se tomó después de observar el
+nuevo bloque. Por esa razón, el resultado filtrado no se considera una segunda validación
+fuera de muestra, sino un análisis \emph{post-hoc} que genera una hipótesis para validación
+prospectiva.
 
 \subsection{Protocolo de congelación}
 \label{sec:congelacion}
 
-El candidato final —modelo, conjunto de características y umbrales de política— se congeló
-antes de observar el conjunto fuera de muestra del 6 al 10 de junio. Esta decisión convierte
-la validación posterior en una prueba fuera de muestra genuina, y previene el sobreajuste por
-selección múltiple~\cite{bailey2014deflated}. Una vez fijada, la política no se reajusta para
-mejorar los resultados.
+El especialista base —modelo, conjunto de características y umbrales EV/salud— se congeló
+antes de observar el conjunto fuera de muestra del 6 al 10 de junio. Su evaluación sin filtro
+constituye, por ello, la prueba fuera de muestra genuina y previene el sobreajuste por
+selección múltiple~\cite{bailey2014deflated}. El filtro de volatilidad queda fuera de esa
+afirmación de congelación: se definió como política candidata después del diagnóstico del
+bloque y solo podrá validarse con observaciones posteriores al 10 de junio.

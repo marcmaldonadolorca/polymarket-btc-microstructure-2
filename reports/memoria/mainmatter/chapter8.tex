@@ -3,37 +3,31 @@
 \chapter{Conclusiones}
 \label{ch::conclusiones}
 
-Este trabajo ha presentado una metodología completa de captura de datos, validación temporal
-y control de costes para la predicción de corto plazo en los mercados de Bitcoin de
-Polymarket. La conclusión que atraviesa todo el trabajo es que los clasificadores
-direccionales, pese a una precisión cercana al 90\,\%, dejan de ser rentables bajo una
-latencia de entrada realista: el coste y la ejecución, y no el acierto, determinan el
-resultado. Esta observación, cuantificada en el Capítulo~\ref{ch::metodos}, reorienta el
-problema de la clasificación hacia la ejecución.
+Este trabajo ha presentado una metodología de captura de datos, validación temporal y control
+de costes para la predicción de corto plazo en mercados de Bitcoin de Polymarket. La
+conclusión central es que una precisión direccional cercana al 90\,\% no garantiza una política
+económica: con una latencia de entrada realista, el coste y la ejecución dominan el resultado.
 
-Sobre esa base, el aprendizaje profundo aplicado a secuencias y al libro de órdenes aporta
-capacidad de representación, pero no una política rentable y estable con un horizonte de datos
-de unas dos semanas. Un especialista tabular congelado, combinado con un filtro de
-volatilidad, sí sobrevive a una validación fuera de muestra de cinco días ($+1{,}069$ ticks
-netos por operación al coste de referencia, cinco de cinco días positivos) y queda en
-seguimiento \emph{paper-shadow} con reglas de promoción cuantitativas.
+El aprendizaje profundo aplicado a secuencias y al libro de órdenes aprende representaciones
+útiles, pero no produce una política estable con unas dos semanas de datos. El especialista
+tabular congelado conserva una señal modesta en cinco días intactos fuera de muestra:
+$+0{,}349$ ticks por unidad al coste de referencia, 754 unidades y tres de cinco días
+positivos; bajo el coste completo, el promedio es $-0{,}026$ ticks.
 
-Recapitulando, las aportaciones del trabajo son cuatro. En primer lugar, un sistema
-reproducible de captura y alineación de datos multifuente con control de calidad por sesión.
-En segundo lugar, un protocolo de evaluación que incorpora coste y latencia \emph{medidos} y
-una validación estrictamente temporal con congelación previa del candidato. En tercer lugar,
-la evidencia cuantitativa de que la latencia, y no el acierto, decide el resultado, junto con
-una progresión de modelos que delimita dónde se rompe la cadena entre predicción y ejecución.
-Y en cuarto lugar, un candidato congelado que sobrevive a la validación fuera de muestra y un
-conjunto de experimentos de adaptación con resultado negativo, reportados por su valor
-metodológico. No se afirma rentabilidad real: la aportación del trabajo es la metodología, la
-evidencia obtenida bajo un protocolo honesto y la delimitación explícita de sus límites.
+El análisis posterior detecta un cambio de régimen y propone un filtro de baja volatilidad.
+Sobre el mismo bloque, ese subconjunto alcanza $+1{,}069$ ticks y cinco de cinco días
+positivos. Su valor es el de una hipótesis prometedora, no el de una validación confirmatoria:
+la regla se congela después del diagnóstico y queda pendiente de datos futuros.
 
-\paragraph{Trabajo futuro.} Las líneas abiertas son tres. Primera, ampliar el soporte temporal
-del conjunto fuera de muestra: la mayor parte de las limitaciones se reduce a la escasez de
-días. Segunda, validar el patrón en forma de U entre volatilidad y beneficio, que de momento
-es solo una hipótesis. Tercera, reevaluar las arquitecturas profundas —por ejemplo,
-transformadores temporales como el \emph{Temporal Fusion Transformer}~\cite{lim2021tft}— con un
-horizonte de datos sustancialmente mayor, y solo si consiguen superar al especialista tabular
-bajo el mismo protocolo de costes y validación. La regla que ha guiado todo el trabajo sigue
-en pie: la complejidad debe ganarse su sitio con evidencia.
+Las aportaciones del trabajo son cuatro: un sistema de captura y control de calidad
+multifuente; un protocolo temporal que incorpora coste y latencia medidos; evidencia
+cuantitativa de la ruptura entre predicción y ejecución; y una trazabilidad que conserva tanto
+los resultados negativos como la corrección de errores metodológicos. No se afirma
+rentabilidad real ni se presenta un bot listo para desplegar.
+
+\paragraph{Trabajo futuro.} La prioridad es ejecutar prospectivamente la política completa
+sin retocar umbrales, con una sola regla de exposición por mercado y registro de fills. Solo
+después podrá evaluarse el filtro de volatilidad. Con un horizonte de datos sustancialmente
+mayor podrán reevaluarse arquitecturas como el \emph{Temporal Fusion
+Transformer}~\cite{lim2021tft}. La regla que guía el proyecto permanece: la complejidad y
+cualquier afirmación económica deben ganarse su sitio con evidencia verdaderamente nueva.

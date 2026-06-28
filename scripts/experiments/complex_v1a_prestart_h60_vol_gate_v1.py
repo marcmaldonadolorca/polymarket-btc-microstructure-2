@@ -19,7 +19,7 @@ The vol gate is an OBSERVABLE, CAUSAL filter:
   - No lookahead: measured at exact entry moment
   - Same threshold as TCN regime head HIGH_VOL definition
 
-Decision: VOL_GATE_VALIDATED_ADD_TO_LIVE_SHADOW
+Decision: POSTHOC_DIAGNOSTIC_PENDING_PROSPECTIVE_VALIDATION
 """
 import json, joblib
 import numpy as np
@@ -189,7 +189,7 @@ def main():
         improvement = net_low - net_all if not (pd.isna(net_all) or pd.isna(net_low)) else float("nan")
         print(f"{split:>8} {n_all:>7} {net_all:>13.3f} {n_low:>7} {net_low:>13.3f} {improvement:>12.3f}")
 
-    decision = "VOL_GATE_VALIDATED_ADD_TO_LIVE_SHADOW"
+    decision = "POSTHOC_DIAGNOSTIC_PENDING_PROSPECTIVE_VALIDATION"
     print(f"\nDecision: {decision}")
     print(f"Reasoning: Fresh LOW_VOL net@0.5 > +1.0 ticks vs +0.35 without gate.")
     print(f"  Gate is observable (perp_realized_vol_bps_5s <= 0.6657), no lookahead.")

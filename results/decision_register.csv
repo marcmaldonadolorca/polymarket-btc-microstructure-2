@@ -6,3 +6,4 @@ order,phase,artifact,decision,public_role,reason
 10.0,oof,docs/UPSTREAM_OOF_FUSION_STAGE2_V1.md,NO_GO_CLEAN_OOF_FUSION_STAGE2_COST05,main,Clean OOF second stage is not robust
 13.0,horizon,docs/UPSTREAM_OOF_H120_AUDIT_V1.md,NO_GO_CLEAN_OOF_H120_COST05,main,H120 loses the modest H60 signal
 163.0,prestart_fresh_eval,docs/COMPLEX_V1A_PRESTART_H60_FRESH_EVAL_V1.md,PRESTART_SPECIALIST_FRESH_PASS_VOL_SENSITIVE,main,Fresh June 6-10: no_clock ev>0.75 hp>=0.5 gives +0.349 ticks net@0.5 (n=754). 52% HIGH_VOL regime in fresh vs 19.6% in train.
+170.0,posthoc_regime_diagnostic,docs/16_validacion_fresh.md,POSTHOC_DIAGNOSTIC_PENDING_PROSPECTIVE_VALIDATION,main,The 0.6657 volatility gate was adopted after inspecting June 6-10. Its +1.069 result on 318 action units is descriptive; only later dates can validate the full policy.

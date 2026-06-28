@@ -1,66 +1,52 @@
-# COMPLEX_V1A_PRESTART_H60_PAPER_SHADOW_V1
+# Registro de sombra del especialista H60
 
-Generated: `2026-06-14T10:09:08+00:00`
+## Estado correcto
 
-## Strategy
+```text
+OFFLINE_REPLAY_COMPLETE
+PROSPECTIVE_VALIDATION_PENDING
+```
 
-Frozen prestart HGB specialist + volatility gate.
+El registro disponible reconstruye retrospectivamente la política de baja
+volatilidad sobre el bloque del 6 al 10 de junio. No es una ejecución en vivo ni
+una validación prospectiva, porque el filtro se adoptó tras inspeccionar ese mismo
+bloque.
+
+## Regla congelada para fechas posteriores
 
 ```text
 Vol gate:  perp_realized_vol_bps_5s <= 0.6657
 EV model:  ev_pred > 0.75
-HP model:  hp_pred >= 0.5
-Window:    strict_45_60_early (45-60s before settlement open)
+HP model:  hp_pred >= 0.50
+Window:    strict_45_60_early
+Freeze:    después de 2026-06-10
 ```
 
-## Decision
+## Resumen retrospectivo
 
-```text
-PROMISING_NEEDS_DATA
-```
+| Métrica | Valor |
+|---|---:|
+| Unidades de acción | 318 |
+| Mercados | 156 |
+| Máximo de acciones solapadas por mercado | 8 |
+| Neto medio @0.25 | +1.258 ticks |
+| Neto medio @0.5 | +1.069 ticks |
+| Neto medio @1.0 | +0.691 ticks |
+| Días positivos | 5/5 |
+| IC90 agrupado por mercado | [+0.193, +2.004] |
+| Drawdown diagnóstico | 88.1 ticks |
 
-## Summary Statistics
+El drawdown y la suma acumulada corresponden a unidades de acción con tamaño
+unitario. No incorporan capital, fills, ni una restricción de exposición
+simultánea; no son PnL de cartera.
 
-| Metric | Value |
-|--------|-------|
-| Fresh days | 5 |
-| Days range | 2026-06-06 to 2026-06-10 |
-| Total trades (vol gate) | 318 |
-| Mean net@0.25 (optimista) | +1.255 ticks |
-| Mean net@0.5 (referencia) | +1.069 ticks |
-| Mean net@1.0 (estrés) | +0.697 ticks |
-| Max drawdown (ticks) | 88.1 |
-| Worst day net/trade | +0.025 ticks |
-| Best day net/trade | +3.572 ticks |
-| Positive days | 5/5 |
-| 90% CI net/trade | [+0.472, +1.654] |
-| P(net > 0) | 99.8% |
-| Daily ticks estimate | +68.0 |
+## Puertas prospectivas
 
-## Projection
+Los cinco días retrospectivos no cuentan para estas puertas:
 
-| Gate | Status |
-|------|--------|
-| Days to PAPER_SHADOW_CANDIDATE (8 days, 200 trades, net>0.5) | 3 more days |
-| Days to BOT_CANDIDATE (12 days, 400 trades, net>0.5) | 7 more days |
+| Puerta | Requisito mínimo |
+|---|---|
+| Seguimiento ampliado | >0.5 ticks, 200 acciones, 8 días posteriores |
+| Candidato a despliegue | >0.5 ticks, 400 acciones, 12 días posteriores, fills y exposición validados |
 
-## Risk Controls
-
-| Control | Value |
-|---------|-------|
-| Vol gate (skip HIGH_VOL) | vol > 0.6657 → no trade |
-| No position sizing (paper) | 1x flat always |
-| No intraday stop | collect more data first |
-
-## Models
-
-- EV regressor: `specialist_ev_strict_45_60_early_no_clock.joblib`
-- HP classifier: `specialist_healthy_strict_45_60_early_no_clock.joblib`
-- Manifest: `manifest.json`
-- Frozen since: 2026-05-25 (training days: May 11-20)
-
-## Run
-
-```bash
-python scripts/experiments/complex_v1a_prestart_h60_paper_shadow_v1.py
-```
+Soporte prospectivo actual de la política completa: **0 días**.

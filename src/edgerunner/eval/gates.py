@@ -2,8 +2,9 @@
 
 Extraído de ``scripts/experiments/complex_v1a_prestart_h60_paper_shadow_v1.py``.
 Los gates son deliberadamente conservadores: exigen soporte (días y trades) y no
-solo un neto positivo. El candidato actual queda en PROMISING_NEEDS_DATA por
-falta de días, no por falta de señal.
+solo un neto positivo. Estas puertas se aplican exclusivamente a observaciones
+prospectivas posteriores a la congelación de la política completa; el replay
+retrospectivo no cuenta como soporte.
 """
 
 from __future__ import annotations

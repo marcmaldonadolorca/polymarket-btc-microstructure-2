@@ -2,13 +2,10 @@
 % Document class
 % --------------------------
 \documentclass[
-A4paper,                % paper size A4
+a4paper,                % paper size A4
 oneside,                % entrega electrónica: sin páginas en blanco de cuadernillo
 openany,                % los capítulos pueden empezar en cualquier página
-chapterprefix=true,     % prefix for chapter marks
-12pt,                   % font size
-headings=normal,        % size of headings
-titlepage=on            % own page for each title page
+12pt                    % font size
 ]{book}
 
 % **************************************************
@@ -34,19 +31,11 @@ titlepage=on            % own page for each title page
 % --------------------------
 % Cover and front matter
 % --------------------------
-\frontmatter
 \pagestyle{empty}				    % no header nor footer
 \input{frontmatter/1_cover}
-\newpage
-
-
-
-\pagenumbering{roman}			    % roman page numbering 
+\frontmatter                         % roman page numbering starts after the cover
 \pagestyle{plain}				    % empty header, just page number in footer
 \input{frontmatter/3_teseo}
-\cleardoublepage
-
-\input{frontmatter/4_dedication}   % dedication (optional)
 \cleardoublepage
 
 \input{frontmatter/5_acknowledgement}  % acknowledgement (optional)
@@ -76,8 +65,6 @@ titlepage=on            % own page for each title page
 % Main matter
 % --------------------------
 \mainmatter
-\pagenumbering{arabic}			% arabic page numbering
-\setcounter{page}{1}			% set page counter
 \pagestyle{fancy} 	            % fancy header and footer
 \parskip=7pt                    % space after each paragraph
 \parindent=0pt                  % suppress indentation of paragraphs

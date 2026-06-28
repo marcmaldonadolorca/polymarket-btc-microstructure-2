@@ -20,15 +20,14 @@ dataset,fresh_pipeline_refresh_2026_06_10,decision,FRESH_PIPELINE_READY,decision
 dataset,fresh_pipeline_refresh_2026_06_10,h16_rows,344850,rows,FRESH_PIPELINE_READY,H16 cache written from official SQLite feature ids.
 dataset,fresh_pipeline_refresh_2026_06_10,execution_rows,342454,rows,FRESH_PIPELINE_READY,Execution dataset built from isolated fresh base L2 parquet.
 strategy,complex_v1a_prestart_h60_specialist_v1,fresh_no_clock_net_at_0p5_no_gate,+0.349,ticks,PRESTART_FRESH_PASS_VOL_SENSITIVE,"no_clock specialist ev>0.75 hp>=0.5 on June 6-10 fresh: +0.349 ticks net@0.5 (n=754, 52% HIGH_VOL)."
-strategy,complex_v1a_prestart_h60_vol_gate_v1,fresh_no_clock_net_at_0p5_vol_gate,+1.076,ticks,VOL_GATE_VALIDATED_ADD_TO_LIVE_SHADOW,Vol gate (vol<=0.6657) selects 319/754 LOW_VOL rows: +1.076 ticks net@0.5. Gate threshold = TCN HIGH_VOL_THR = q80 training vol.
-strategy,complex_v1a_prestart_h60_vol_gate_v1,combined_strategy_daily_ticks_estimate,+68.6,ticks/5days,VOL_GATE_VALIDATED_ADD_TO_LIVE_SHADOW,63.8 trades/day x 1.076 = 68.6 ticks over 5 fresh days (vs carry gate ~83 ticks for same period).
-validation,complex_v1a_prestart_h60_distributional_v1,q10_gate_val_net_at_0p5,+1.376,ticks,Q10_GATE_HISTORICAL_OK_FRESH_INFERIOR,"Q10 downside gate (q10>=-5): val +1.376 (vs baseline +0.766), test +0.962 (vs +0.430). Fresh: +0.813 vs vol gate +1.076."
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,decision,PROMISING_NEEDS_DATA,str,PROMISING_NEEDS_DATA,"Prestart specialist + vol gate paper shadow: 5 days, 318 trades"
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,n_fresh_days,5,days,OK,2026-06-06 to 2026-06-10
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,n_trades_vol_gate,318,trades,OK,63.6 trades/day average
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,mean_net_at_0p5,1.069,ticks,POSITIVE,"90% CI [+0.472, +1.654]"
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,p_net_positive_bootstrap,99.8,pct,STRONG,Bootstrap 5000 resamples
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,daily_ticks_estimate,68.0,ticks/day,POSITIVE,Mean total ticks per fresh day
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,max_drawdown_ticks,88.1,ticks,OK,Cumulative peak-to-trough on paper trades
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,days_to_paper_shadow_candidate,3,days,TARGET,"Need 8 days, 200 trades, net>0.5"
-complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,days_to_bot_candidate,7,days,TARGET,"Need 12 days, 400 trades, net>0.5"
+strategy,complex_v1a_prestart_h60_vol_gate_v1,fresh_no_clock_net_at_0p5_vol_gate,+1.069,ticks,POSTHOC_DIAGNOSTIC,Vol gate (vol<=0.6657) selects 318/754 LOW_VOL actions: +1.069 ticks net@0.5. The gate was adopted after inspecting this block and requires later prospective validation.
+strategy,complex_v1a_prestart_h60_vol_gate_v1,combined_strategy_daily_ticks_estimate,+68.0,ticks/day,POSTHOC_DIAGNOSTIC,Retrospective action-unit average on the same five-day block; not prospective portfolio PnL.
+validation,complex_v1a_prestart_h60_distributional_v1,q10_gate_val_net_at_0p5,+1.376,ticks,Q10_GATE_HISTORICAL_OK_FRESH_INFERIOR,"Q10 downside gate (q10>=-5): val +1.376 (vs baseline +0.766), test +0.962 (vs +0.430). Fresh: +0.813 vs post-hoc vol diagnostic +1.069."
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,decision,POSTHOC_DIAGNOSTIC_PENDING_PROSPECTIVE_VALIDATION,str,POSTHOC_DIAGNOSTIC,"Offline replay on the same five-day block: 318 action units from 156 markets"
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,n_diagnostic_days,5,days,DESCRIPTIVE,2026-06-06 to 2026-06-10; these days do not count as prospective support for the full policy
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,n_actions_vol_gate,318,actions,DESCRIPTIVE,156 markets and up to 8 overlapping H60 action units per market
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,mean_net_at_0p5,1.069,ticks,POSTHOC_DIAGNOSTIC,"Market-clustered 90% CI [+0.193, +2.004]"
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,p_net_positive_market_cluster_bootstrap,97.6,pct,DESCRIPTIVE,Market-cluster bootstrap with 5000 resamples; post-hoc subset
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,diagnostic_daily_ticks_average,68.0,ticks/day,DESCRIPTIVE,Retrospective sum of unit actions without portfolio exposure constraints
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,diagnostic_max_drawdown_ticks,88.1,ticks,DESCRIPTIVE,Action-unit cumulative diagnostic; not portfolio drawdown
+complex_v1a_prestart_h60_paper_shadow_v1,complex_v1a_prestart_h60_paper_shadow_v1,prospective_days,0,days,WAITING,Only dates after 2026-06-10 can validate the full policy

@@ -1,7 +1,11 @@
 """
 complex_v1a_prestart_h60_paper_shadow_v1.py
 
-Paper trading shadow for the frozen prestart HGB specialist + vol gate.
+Retrospective offline ledger for the prestart HGB specialist + vol gate.
+
+The volatility gate was adopted after inspecting the 6--10 June block.  Results
+on that block are diagnostic and must not be counted as prospective validation
+of the combined policy.
 
 Policy (frozen, DO NOT retune):
     perp_realized_vol_bps_5s <= 0.6657   (vol gate)
@@ -379,7 +383,10 @@ def main() -> None:
     # Aggregate stats
     outcomes = selected["exec_net_cost_0p5_H60"].values
     net_050 = float(np.mean(outcomes))
-    net_025 = float(np.mean(outcomes - 0.25))  # more conservative cost assumption
+    # Use the dataset's cost-aware outcomes directly.  Deriving @0.25 by
+    # subtracting from the @0.5 column reverses the intended cost ordering.
+    net_025 = float(selected["exec_net_cost_0p25_H60"].mean())
+    net_100 = float(selected["exec_net_cost_1p0_H60"].mean())
     n_losses = int(selected["is_loss"].sum())
     cum_pnl = list(np.cumsum(outcomes))
     max_dd = compute_drawdown(cum_pnl)
@@ -420,7 +427,7 @@ def main() -> None:
     print(f"=== RESULTS ===")
     print(f"  Days: {n_days}  ({days_range})")
     print(f"  Trades: {len(selected)}  ({trades_per_day:.1f}/day)")
-    print(f"  Net@0.5: {net_050:+.3f}  Net@0.25: {net_025:+.3f}")
+    print(f"  Net@0.25: {net_025:+.3f}  Net@0.5: {net_050:+.3f}  Net@1.0: {net_100:+.3f}")
     print(f"  90% CI: [{ci_low:+.3f}, {ci_high:+.3f}]  P(>0): {p_positive:.1f}%")
     print(f"  Max drawdown: {max_dd:.1f} ticks  Worst day: {worst_day_net:+.3f}/trade")
     print(f"  Positive days: {n_positive_days}/{n_days}")

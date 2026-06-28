@@ -42,9 +42,25 @@ reports/*.toc
 reports/*.synctex.gz
 reports/*.fls
 reports/*.fdb_latexmk
+reports/memoria/*.aux
+reports/memoria/*.log
+reports/memoria/*.out
+reports/memoria/*.toc
+reports/memoria/*.lof
+reports/memoria/*.lot
+reports/memoria/*.xdv
+reports/memoria/*.synctex.gz
+reports/memoria/build_audit.log
+reports/memoria/main.pdf
+reports/memoria/texput.pdf
+reports/memoria/texput.log
+reports/memoria/mainmatter/*.aux
 
 # --- SO / editor ---
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Guía de defensa (privada, no se publica)
+reports/defensa.md

@@ -1,5 +1,7 @@
-# Política congelada del especialista prestart H60 (candidato final).
-# Estos valores NO se retocan: se fijaron antes de ver los datos fresh (6-10 jun).
+# Política candidata del especialista prestart H60.
+# El modelo y los umbrales EV/HP se fijaron antes del bloque fresh (6-10 jun).
+# El vol_gate se incorporó tras diagnosticar ese bloque y queda congelado desde
+# 2026-06-10 para una validación exclusivamente posterior.
 # Ver docs/14_especialista_prestart_h60.md, docs/15_vol_gate.md, docs/16_validacion_fresh.md.
 
 specialist:
@@ -14,7 +16,9 @@ policy:
 
 vol_gate:
   feature: perp_realized_vol_bps_5s
-  max: 0.6657            # q80 del training; crítico porque el régimen fresh cambió (22% -> 52-71% HIGH_VOL)
+  max: 0.6657            # q80 del training; inclusión en la política decidida post-hoc
+  policy_freeze_after: 2026-06-10
+  evidence_status: POSTHOC_DIAGNOSTIC_PENDING_PROSPECTIVE_VALIDATION
 
 cost_model:
   reference_cost_ticks: 0.5   # coste conservador de referencia
@@ -22,6 +26,7 @@ cost_model:
   latency_contract_seconds: 2 # contrato conservador (malla del dataset); p95 medido ~0.43 s
 
 decision_gates:
-  PAPER_SHADOW_CANDIDATE: "net@0.5 > 0.50 AND n_trades >= 200 AND n_days >= 8"
-  PROMISING_NEEDS_DATA:   "net@0.5 > 0.00 AND n_trades < 200"
+  # Solo cuentan observaciones posteriores a policy_freeze_after.
+  PAPER_SHADOW_CANDIDATE: "net@0.5 > 0.50 AND n_actions >= 200 AND n_days >= 8"
+  PROMISING_NEEDS_DATA:   "net@0.5 > 0.00 AND n_actions < 200"
   REVIEW_POLICY:          "net@0.5 <= 0.00 AND n_days >= 3"
