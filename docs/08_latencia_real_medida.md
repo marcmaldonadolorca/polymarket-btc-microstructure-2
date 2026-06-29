@@ -1,5 +1,3 @@
-<!-- fuente original: LATENCY_V04_OPERATIVE_DECISION.md -->
-
 # Latency v0.4 - Solucion para fijar L operativo
 
 Fecha: `2026-06-01`
@@ -226,10 +224,7 @@ L=2s es provisional si nos basamos solo en ack publico.
 Para cerrar L_operativo falta total_seen_to_fill_ms real.
 ```
 
-
 ---
-
-<!-- fuente original: LATENCY_V11_OPERATIVE_CLOSEOUT.md -->
 
 # Latency v1.1 - Cierre operativo
 
@@ -301,7 +296,6 @@ stress:   L=2s
 
 El objetivo ya no es "medir si la latencia es de segundos", sino comprobar si
 el edge offline sobrevive con una entrada retrasada realista.
-
 
 ---
 

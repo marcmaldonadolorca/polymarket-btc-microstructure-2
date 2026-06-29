@@ -1,5 +1,3 @@
-<!-- fuente original: UPSTREAM_OOF_H120_AUDIT_V1.md -->
-
 # Upstream OOF H120 audit v1
 
 Fecha: 2026-06-04
@@ -150,10 +148,7 @@ No se debe promover todavía a bot ni aumentar a CNN/Transformer grande por
 este resultado aislado. El siguiente paso depende de si H120 mejora de forma
 causal y estable frente a H60, no de que exista una suma positiva puntual.
 
-
 ---
-
-<!-- fuente original: COMPLEX_V1_LONG_HORIZON_PROBE.md -->
 
 # Complex v1 - Probe de horizontes largos
 
@@ -408,8 +403,6 @@ Alargar horizonte mejora algunas celdas con coste reducido, especialmente a
 siguiente modelo debe aprender valor esperado de ejecucion por horizonte y
 riesgo de fill, no solo direccion.
 ```
-
-
 
 ---
 

@@ -1,5 +1,3 @@
-<!-- fuente original: DATA_MODEL.md -->
-
 # Data Model
 
 ## Fuente de verdad
@@ -232,10 +230,7 @@ Primer predictor:
 - filtros de tradability por mercado
 - sidecars opcionales fuera salvo mascaras
 
-
 ---
-
-<!-- fuente original: official_corpus_snapshot.md -->
 
 # Official Corpus Snapshot
 
@@ -479,7 +474,6 @@ Mi recomendacion:
 - usar `predictor_labels` como target canónico
 - unir `cross_venue_features + market_metadata + tradability + contextos nativos`
 - dejar sidecars opcionales fuera del primer modelo salvo como mascaras o analisis auxiliar
-
 
 ---
 

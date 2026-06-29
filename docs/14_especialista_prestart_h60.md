@@ -1,5 +1,3 @@
-<!-- fuente original: COMPLEX_V1A_PRESTART_H60_SPECIALIST_V1.md -->
-
 # Complex v1a - prestart H60 specialist v1
 
 Fecha: 2026-06-02
@@ -362,10 +360,7 @@ NO GO estrategia fija.
 GO a risk gate de regimen.
 ```
 
-
 ---
-
-<!-- fuente original: COMPLEX_V1A_PRESTART_H60_STRICT_CANDIDATE_V1.md -->
 
 # Complex v1a - prestart H60 strict candidate v1
 
@@ -656,7 +651,6 @@ Limitacion nueva:
 el agregado pasa, pero hay dias negativos. Siguiente paso: estabilidad
 walk-forward diaria.
 ```
-
 
 ---
 

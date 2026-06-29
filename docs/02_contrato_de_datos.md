@@ -1,5 +1,3 @@
-<!-- fuente original: BASELINE_V03_DATASET_CONTRACT.md -->
-
 # Baseline v0.3 - Contrato de dataset offline
 
 Fecha: `2026-05-31`
@@ -231,10 +229,7 @@ Notebook de lectura ya creado:
 notebooks/16_baseline_v03_dataset_contract.ipynb
 ```
 
-
 ---
-
-<!-- fuente original: COMPLEX_V1A_EXECUTION_DATASET.md -->
 
 # Complex v1a - Dataset row-level de ejecucion
 
@@ -562,7 +557,6 @@ Resumen:
 - `H120`: no hubo policy positiva en validation, aunque test mostraba
   oportunidades fuertes.
 - el modelo generaliza debilmente y depende mucho del reloj del contrato.
-
 
 ---
 

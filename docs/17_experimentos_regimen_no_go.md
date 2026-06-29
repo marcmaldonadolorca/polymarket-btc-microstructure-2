@@ -1,5 +1,3 @@
-<!-- fuente original: COMPLEX_V1A_PRESTART_H60_REGIME_DETECTOR_V1.md -->
-
 # Complex v1a - prestart H60 regime detector v1
 
 Fecha: 2026-06-02
@@ -333,11 +331,7 @@ hacer primero una auditoria offline de session/block regime para saber si
 existe senal de regimen. Si existe, rehacerla despues en version causal.
 ```
 
-
-
 ---
-
-<!-- fuente original: COMPLEX_V1A_PRESTART_H60_SESSION_BLOCK_REGIME_V1.md -->
 
 # Complex v1a - prestart H60 session/block regime v1
 
@@ -670,11 +664,7 @@ Si `causal_block_regime_v1` tambien falla, entonces la opcion honesta sera:
 - pasar a encoders solo como investigacion comparativa;
 - o admitir que falta mas corpus/live execution para distinguir regimenes.
 
-
-
 ---
-
-<!-- fuente original: COMPLEX_V1A_PRESTART_H60_CAUSAL_BLOCK_REGIME_V1.md -->
 
 # Complex v1a - prestart H60 causal block regime v1
 
@@ -1047,8 +1037,6 @@ La vara de medir queda clara:
 debe superar a los gates causales tabulares en estabilidad temporal, no solo en
 promedio.
 ```
-
-
 
 ---
 

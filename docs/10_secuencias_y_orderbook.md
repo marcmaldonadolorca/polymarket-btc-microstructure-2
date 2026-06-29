@@ -1,5 +1,3 @@
-<!-- fuente original: COMPLEX_V1A_SEQUENCE_PROBE_V1.md -->
-
 # Complex v1a - sequence probe v1
 
 Fecha: 2026-06-02
@@ -322,11 +320,7 @@ y mejora sobre flatten_full y gates causales tabulares.
 
 No empezamos por Transformer grande.
 
-
-
 ---
-
-<!-- fuente original: BOOK_ONLY_CONV1D_BASELINE_V1.md -->
 
 # Book-only Conv1D baseline v1
 
@@ -458,10 +452,7 @@ fusion_v1 = encoder orderbook + GRU tabular + evaluacion de policy con costes y 
 
 No saltamos todavia a Transformer grande ni a bot. Primero queremos demostrar mejora incremental y estable.
 
-
 ---
-
-<!-- fuente original: FUSION_V1_BOOK_TABULAR_SEQUENCE.md -->
 
 # Fusion v1 - book + tabular sequence
 
@@ -568,7 +559,6 @@ Conclusion practica:
 ```text
 seguir con fusion, pero orientada a selector/riesgo y coste 1.00, no a red mas grande.
 ```
-
 
 ---
 
